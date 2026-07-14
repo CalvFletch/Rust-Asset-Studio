@@ -335,21 +335,37 @@ namespace AssetStudio.GUI
             }
         }
 
+        private bool loadInProgress;
+
         public async void LoadPaths(params string[] paths)
         {
-            ResetForm();
-            assetsManager.SpecifyUnityVersion = specifyUnityVersion.Text;
-            assetsManager.Game = Studio.Game;
-            TryLoadRustAssemblies(paths[0]);
-            if (paths.Length == 1 && Directory.Exists(paths[0]))
+            if (loadInProgress)
             {
-                await Task.Run(() => assetsManager.LoadFolder(paths[0]));
+                Logger.Warning("A load is already in progress. Wait for it to finish, or use File -> Reset first.");
+                StatusStripUpdate("A load is already in progress...");
+                return;
             }
-            else
+            loadInProgress = true;
+            try
             {
-                await Task.Run(() => assetsManager.LoadFiles(paths));
+                ResetForm();
+                assetsManager.SpecifyUnityVersion = specifyUnityVersion.Text;
+                assetsManager.Game = Studio.Game;
+                TryLoadRustAssemblies(paths[0]);
+                if (paths.Length == 1 && Directory.Exists(paths[0]))
+                {
+                    await Task.Run(() => assetsManager.LoadFolder(paths[0]));
+                }
+                else
+                {
+                    await Task.Run(() => assetsManager.LoadFiles(paths));
+                }
+                await BuildAssetStructures();
             }
-            BuildAssetStructures();
+            finally
+            {
+                loadInProgress = false;
+            }
         }
 
         private void TryLoadRustAssemblies(string path)
@@ -372,23 +388,18 @@ namespace AssetStudio.GUI
             assemblyLoader.Load(managed);
         }
 
-        private async void loadFile_Click(object sender, EventArgs e)
+        private void loadFile_Click(object sender, EventArgs e)
         {
             openFileDialog1.InitialDirectory = openDirectoryBackup;
             if (openFileDialog1.ShowDialog(this) == DialogResult.OK)
             {
                 var paths = openFileDialog1.FileNames;
-                ResetForm();
                 openDirectoryBackup = Path.GetDirectoryName(paths[0]);
-                assetsManager.SpecifyUnityVersion = specifyUnityVersion.Text;
-                assetsManager.Game = Studio.Game;
-                TryLoadRustAssemblies(paths[0]);
                 if (paths.Length == 1 && File.Exists(paths[0]) && Path.GetExtension(paths[0]) == ".txt")
                 {
                     paths = File.ReadAllLines(paths[0]);
                 }
-                await Task.Run(() => assetsManager.LoadFiles(paths));
-                BuildAssetStructures();
+                LoadPaths(paths);
             }
         }
 
@@ -527,7 +538,7 @@ namespace AssetStudio.GUI
             }
         }
 
-        private async void BuildAssetStructures()
+        private async Task BuildAssetStructures()
         {
             if (assetsManager.assetsFileList.Count == 0)
             {
