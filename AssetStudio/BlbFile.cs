@@ -129,7 +129,7 @@ namespace AssetStudio
                 var uncompressedBytes = ArrayPool<byte>.Shared.Rent(uncompressedSize);
                 try
                 {
-                    reader.Read(compressedBytes, 0, compressedSize);
+                    reader.BaseStream.ReadExactly(compressedBytes, 0, compressedSize);
 
                     var compressedBytesSpan = compressedBytes.AsSpan(0, compressedSize);
                     var uncompressedBytesSpan = uncompressedBytes.AsSpan(0, uncompressedSize);

@@ -561,7 +561,7 @@ namespace AssetStudio
                                 var compressedBytesSpan = compressedBytes.AsSpan(0, compressedSize);
                                 var uncompressedBytesSpan = uncompressedBytes.AsSpan(0, uncompressedSize);
 
-                                reader.Read(compressedBytesSpan);
+                                reader.BaseStream.ReadExactly(compressedBytesSpan);
                                 if (compressionType == CompressionType.Lz4Mr0k && Mr0kUtils.IsMr0k(compressedBytes))
                                 {
                                     Logger.Verbose($"Block encrypted with mr0k, decrypting...");
@@ -611,7 +611,7 @@ namespace AssetStudio
 
                             try
                             {
-                                reader.Read(compressedBytesSpan);
+                                reader.BaseStream.ReadExactly(compressedBytesSpan);
                                 if (i == 0)
                                 {
                                     FairGuardUtils.Decrypt(compressedBytesSpan);
@@ -641,7 +641,7 @@ namespace AssetStudio
 
                             try
                             {
-                                reader.Read(compressedBytes, 0, compressedSize);
+                                reader.BaseStream.ReadExactly(compressedBytes, 0, compressedSize);
                                 using var decompressor = new Decompressor();
                                 var numWrite = decompressor.Unwrap(compressedBytes, 0, compressedSize, uncompressedBytes, 0, uncompressedSize);
                                 if (numWrite != uncompressedSize)

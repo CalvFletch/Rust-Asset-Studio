@@ -18,7 +18,7 @@ Goal: make this the best tool for browsing and exporting Rust's game content. Th
 
 Upstream Studio v1.36 predates Unity 6; Rust's `6000.3.x` build exposed layout changes in several class readers, all fixed against the embedded typetrees of the live install: Renderer/SkinnedMeshRenderer (ray-tracing accel flags, small-mesh culling, mesh LOD, mask interaction), Texture/Texture2D (fallback-format fields removed, mipmap-limit fields), Shader (SerializedPass editor data removed from player builds, PlayerSubPrograms/stageCounts gates), AnimationClip curve flags, and compressed SpeedTree meshes. Watch for upstream's `version[0] == 2022` gate antipattern when Rust updates Unity again — those checks silently exclude 6000.
 
-Known issue: four SpeedTree foliage meshes (`Tropical* Mesh`, compressed, in `BuildPlayer-AssetScene-props.other.sharedAssets`) fail to parse only when the full Bundles folder is loaded — they parse fine when `assetscenes.bundle` is loaded alone. The errors are caught per-object and everything else loads normally; root cause still to be traced (suspect an interaction in the multi-bundle load path).
+A subtle upstream reader bug also surfaced here: `EndianBinaryReader.Read*Array(length)` treats a length of 0 as "read the count from the stream", so passing a computed 0 (e.g. the empty inline index buffer of a compressed mesh) silently consumed an extra int and shifted the rest of the object. Fixed for the Mesh index buffer; keep it in mind when passing computed lengths to those helpers.
 
 ## Phase 1 — Rust as a first-class citizen
 
