@@ -11,6 +11,7 @@ namespace AssetStudio
         static GameManager()
         {
             int index = 0;
+            Games.Add(index++, new(GameType.Rust));
             Games.Add(index++, new(GameType.Normal));
             Games.Add(index++, new(GameType.UnityCN));
             Games.Add(index++, new Mhy(GameType.GI, GIMhyShiftRow, GIMhyKey, GIMhyMul, GIExpansionKey, GISBox, GIInitVector, GIInitSeed));
@@ -130,6 +131,7 @@ namespace AssetStudio
 
     public enum GameType
     {
+        Rust,
         Normal,
         UnityCN,
         GI,
@@ -171,7 +173,10 @@ namespace AssetStudio
 
     public static class GameTypes
     {
+        public static bool IsRust(this GameType type) => type == GameType.Rust;
         public static bool IsNormal(this GameType type) => type == GameType.Normal;
+        // Rust bundles are plain Unity files with no game-specific encryption or container format.
+        public static bool IsPlain(this GameType type) => type == GameType.Rust || type == GameType.Normal;
         public static bool IsUnityCN(this GameType type) => type == GameType.UnityCN;
         public static bool IsGI(this GameType type) => type == GameType.GI;
         public static bool IsGIPack(this GameType type) => type == GameType.GI_Pack;

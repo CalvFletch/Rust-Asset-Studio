@@ -163,7 +163,7 @@ namespace AssetStudio
         public static FileReader PreProcessing(this FileReader reader, Game game)
         {
             Logger.Verbose($"Applying preprocessing to file {reader.FileName}");
-            if (reader.FileType == FileType.ResourceFile || !game.Type.IsNormal())
+            if (reader.FileType == FileType.ResourceFile || !game.Type.IsPlain())
             {
                 Logger.Verbose("File is encrypted !!");
                 switch (game.Type)
