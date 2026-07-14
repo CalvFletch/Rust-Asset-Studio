@@ -36,6 +36,7 @@ namespace AssetStudio.GUI
             fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             loadFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             loadFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            loadRustBundlesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             extractFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             extractFolderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -206,7 +207,7 @@ namespace AssetStudio.GUI
             // 
             // fileToolStripMenuItem
             // 
-            fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { loadFileToolStripMenuItem, loadFolderToolStripMenuItem, toolStripMenuItem1, extractFileToolStripMenuItem, extractFolderToolStripMenuItem, toolStripSeparator6, resetToolStripMenuItem, abortStripMenuItem });
+            fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { loadFileToolStripMenuItem, loadFolderToolStripMenuItem, loadRustBundlesToolStripMenuItem, toolStripMenuItem1, extractFileToolStripMenuItem, extractFolderToolStripMenuItem, toolStripSeparator6, resetToolStripMenuItem, abortStripMenuItem });
             fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             fileToolStripMenuItem.Text = "File";
@@ -224,6 +225,13 @@ namespace AssetStudio.GUI
             loadFolderToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             loadFolderToolStripMenuItem.Text = "Load folder";
             loadFolderToolStripMenuItem.Click += loadFolder_Click;
+            //
+            // loadRustBundlesToolStripMenuItem
+            //
+            loadRustBundlesToolStripMenuItem.Name = "loadRustBundlesToolStripMenuItem";
+            loadRustBundlesToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
+            loadRustBundlesToolStripMenuItem.Text = "Load Rust bundles";
+            loadRustBundlesToolStripMenuItem.Click += loadRustBundles_Click;
             // 
             // toolStripMenuItem1
             // 
@@ -1421,6 +1429,7 @@ namespace AssetStudio.GUI
         private System.Windows.Forms.TextBox listSearch;
         private System.Windows.Forms.ToolStripMenuItem loadFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadFolderToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem loadRustBundlesToolStripMenuItem;
         private System.Windows.Forms.ListView assetListView;
         private System.Windows.Forms.ColumnHeader columnHeaderName;
         private System.Windows.Forms.ColumnHeader columnHeaderSize;

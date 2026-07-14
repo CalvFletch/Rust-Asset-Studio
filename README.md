@@ -6,14 +6,13 @@ Rust ships as a standard Unity game with unencrypted asset bundles, but its cont
 
 ## Status
 
-Early days. Right now this is Studio v1.36.00 with a `Rust` game profile as the default. See [docs/ROADMAP.md](docs/ROADMAP.md) for where it's headed.
+Early days, but working: current Rust (Unity 6, `6000.3.x`) bundles load and parse, including full `MonoBehaviour` data via the embedded typetrees. See [docs/ROADMAP.md](docs/ROADMAP.md) for where it's headed.
 
 ## Quick start (GUI)
 
-1. Launch `AssetStudioGUI`. The game selector (Options → Specify Game) defaults to **Rust**.
-2. `File → Load folder` and pick your Rust install's `Bundles` folder (e.g. `C:\Program Files (x86)\Steam\steamapps\common\Rust\Bundles`). Loading everything takes a while and a lot of RAM — start with a single bundle such as `content.bundle` if you're exploring.
+1. Launch `AssetStudio.GUI`. The game selector (Options → Specify Game) defaults to **Rust**.
+2. `File → Load Rust bundles` auto-detects your Steam install and loads its `Bundles` folder. Or use `File → Load folder`/`Load file` to pick bundles manually — loading everything takes a while and a lot of RAM, so start with a single bundle such as `shared\items.preload.bundle` if you're exploring.
 3. Browse the asset list or scene hierarchy, then export via the `Export` menu.
-4. To inspect `MonoBehaviour` data fully, point the assembly prompt at `<RustInstall>\RustClient_Data\Managed` when asked.
 
 ## Quick start (CLI)
 
