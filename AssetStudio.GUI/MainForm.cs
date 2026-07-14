@@ -91,7 +91,121 @@ namespace AssetStudio.GUI
             InitializeProgressBar();
             InitializeLogger();
             InitalizeOptions();
+            InitializeHelperMode();
+            InitializeTheme();
             FMODinit();
+        }
+
+        private void InitializeTheme()
+        {
+            UpdateThemeMenuChecks();
+            Theme.Apply(this, Theme.ShouldUseDark(Properties.Settings.Default.themeMode));
+        }
+
+        private void themeMenuItem_Click(object sender, EventArgs e)
+        {
+            var mode = (int)((ToolStripMenuItem)sender).Tag;
+            Properties.Settings.Default.themeMode = mode;
+            Properties.Settings.Default.Save();
+            UpdateThemeMenuChecks();
+            Theme.Apply(this, Theme.ShouldUseDark(mode));
+        }
+
+        private void UpdateThemeMenuChecks()
+        {
+            var mode = Properties.Settings.Default.themeMode;
+            themeSystemMenuItem.Checked = mode == 0;
+            themeLightMenuItem.Checked = mode == 1;
+            themeDarkMenuItem.Checked = mode == 2;
+        }
+
+        private ToolTip helpToolTip;
+
+        private void InitializeHelperMode()
+        {
+            helpTooltipsMenuItem.Checked = Properties.Settings.Default.helpTooltips;
+            ApplyHelperMode(helpTooltipsMenuItem.Checked);
+        }
+
+        private void helpTooltips_CheckedChanged(object sender, EventArgs e)
+        {
+            Properties.Settings.Default.helpTooltips = helpTooltipsMenuItem.Checked;
+            Properties.Settings.Default.Save();
+            ApplyHelperMode(helpTooltipsMenuItem.Checked);
+        }
+
+        private void ApplyHelperMode(bool enabled)
+        {
+            menuStrip1.ShowItemToolTips = enabled;
+            SetDropDownToolTips(menuStrip1.Items, enabled);
+            tabControl1.ShowToolTips = enabled;
+            tabControl2.ShowToolTips = enabled;
+
+            if (!enabled)
+            {
+                helpToolTip?.RemoveAll();
+                tabPage1.ToolTipText = string.Empty;
+                tabPage2.ToolTipText = string.Empty;
+                tabPage3.ToolTipText = string.Empty;
+                tabPage4.ToolTipText = string.Empty;
+                tabPage5.ToolTipText = string.Empty;
+                return;
+            }
+
+            helpToolTip ??= new ToolTip { AutoPopDelay = 30000, InitialDelay = 600, ReshowDelay = 200 };
+
+            tabPage1.ToolTipText = "Every GameObject from the loaded bundles, in parent/child order. Used for model export.";
+            tabPage2.ToolTipText = "Flat list of every asset found. Used for previewing and exporting individual assets.";
+            tabPage3.ToolTipText = "Summary of the Unity classes present in the loaded files.";
+            tabPage4.ToolTipText = "Visual preview of the asset selected in the Asset List.";
+            tabPage5.ToolTipText = "Raw field-by-field data of the selected asset.";
+
+            helpToolTip.SetToolTip(sceneTreeView, "Scene Hierarchy: every GameObject from the loaded bundles.\nTick checkboxes here, then use the Model menu to export the ticked objects as FBX.");
+            helpToolTip.SetToolTip(treeSearch, "Type to search GameObjects, then press Enter to jump between matches.\nHold Ctrl+Enter to also tick the current match, Shift+Enter to tick every match.");
+            helpToolTip.SetToolTip(assetListView, "Asset List: every asset in the loaded bundles (meshes, textures, MonoBehaviours...).\nClick a row to preview it on the right. Select rows and use the Export menu to save them.\nClick a column header to sort; right-click a row for quick actions.");
+            helpToolTip.SetToolTip(listSearch, "Filter the Asset List by name. Press Enter to apply.");
+            helpToolTip.SetToolTip(classesListView, "Asset Classes: every Unity type found, grouped by Unity version.\nSelect one to see its full structure on the right.");
+            helpToolTip.SetToolTip(classTextBox, "The full field layout (typetree) of the selected class.");
+            helpToolTip.SetToolTip(previewPanel, "Preview: shows the selected asset.\nImages zoom with the mouse wheel; 3D meshes rotate with the left mouse button and zoom with the wheel.");
+            helpToolTip.SetToolTip(dumpTextBox, "Dump: the selected asset's raw data, straight from the typetree.\nGreat for reading Rust MonoBehaviour data like item definitions and prefab settings.");
+            helpToolTip.SetToolTip(progressBar1, "Progress of the current load or export operation.");
+            helpToolTip.SetToolTip(statusStrip1, "Status bar: what the app is doing right now. Errors show up here too.");
+
+            SetHelperText(fileToolStripMenuItem, "Start here: load Rust bundles to browse their assets.");
+            SetHelperText(loadFileToolStripMenuItem, "Open one or more bundle files.\nGood first pick: Bundles\\shared\\items.preload.bundle in your Rust install.");
+            SetHelperText(loadFolderToolStripMenuItem, "Load every bundle inside a folder.\nRust's full Bundles folder is 40+ GB, so prefer single bundles while exploring.");
+            SetHelperText(loadRustBundlesToolStripMenuItem, "Auto-detect your Rust install from Steam and load its whole Bundles folder.\nThis is the everything-at-once option: it needs a lot of time and RAM.");
+            SetHelperText(extractFileToolStripMenuItem, "Decompress a bundle into raw Unity files on disk, without opening it here.");
+            SetHelperText(extractFolderToolStripMenuItem, "Decompress every bundle in a folder into raw Unity files on disk.");
+            SetHelperText(resetToolStripMenuItem, "Unload everything and clear the UI.");
+            SetHelperText(optionsToolStripMenuItem, "Loading, preview, theme and export settings, plus the game profile.");
+            SetHelperText(toolStripMenuItem18, "Which game's bundle format to expect. Keep this on Rust for Rust files.");
+            SetHelperText(modelToolStripMenuItem, "Export the GameObjects you ticked in the Scene Hierarchy as FBX models.\nSplit = one file per object; merge = a single combined file.");
+            SetHelperText(exportToolStripMenuItem, "Export assets selected in the Asset List: converted files (png, fbx, wav...),\nraw bytes, readable dumps, or JSON.");
+            SetHelperText(filterTypeToolStripMenuItem, "Show only certain asset types in the Asset List.");
+            SetHelperText(debugMenuItem, "Logging and diagnostic tools.");
+            SetHelperText(miscToolStripMenuItem, "Advanced tools: build searchable asset maps of a whole game folder\nand browse them with the Asset Browser.");
+            SetHelperText(showExpOpt, "Detailed export settings: output formats, texture type, FBX scale and more.");
+        }
+
+        private static void SetHelperText(ToolStripMenuItem item, string text)
+        {
+            if (string.IsNullOrEmpty(item.ToolTipText))
+            {
+                item.ToolTipText = text;
+            }
+        }
+
+        private static void SetDropDownToolTips(ToolStripItemCollection items, bool enabled)
+        {
+            foreach (ToolStripItem item in items)
+            {
+                if (item is ToolStripMenuItem menuItem && menuItem.HasDropDownItems)
+                {
+                    menuItem.DropDown.ShowItemToolTips = enabled;
+                    SetDropDownToolTips(menuItem.DropDownItems, enabled);
+                }
+            }
         }
 
         private void InitializeExportOptions()

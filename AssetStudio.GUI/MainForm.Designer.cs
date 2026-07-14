@@ -64,6 +64,11 @@ namespace AssetStudio.GUI
             toolStripMenuItem19 = new System.Windows.Forms.ToolStripMenuItem();
             specifyAIVersion = new System.Windows.Forms.ToolStripComboBox();
             showExpOpt = new System.Windows.Forms.ToolStripMenuItem();
+            themeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            themeSystemMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            themeLightMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            themeDarkMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            helpTooltipsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             modelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             exportAllObjectssplitToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             exportSelectedObjectsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -273,7 +278,7 @@ namespace AssetStudio.GUI
             // 
             // optionsToolStripMenuItem
             // 
-            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { displayAll, toolStripSeparator10, enablePreview, enableModelPreview, modelsOnly, toolStripSeparator11, displayInfo, enableResolveDependencies, allowDuplicates, skipContainer, toolStripSeparator12, toolStripMenuItem14, specifyUnityCNKey, toolStripSeparator13, toolStripMenuItem18, toolStripMenuItem19, showExpOpt });
+            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { displayAll, toolStripSeparator10, enablePreview, enableModelPreview, modelsOnly, toolStripSeparator11, displayInfo, enableResolveDependencies, allowDuplicates, skipContainer, toolStripSeparator12, toolStripMenuItem14, specifyUnityCNKey, toolStripSeparator13, toolStripMenuItem18, toolStripMenuItem19, themeMenuItem, helpTooltipsMenuItem, showExpOpt });
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             optionsToolStripMenuItem.Text = "Options";
@@ -428,6 +433,49 @@ namespace AssetStudio.GUI
             showExpOpt.Size = new System.Drawing.Size(225, 22);
             showExpOpt.Text = "Export options";
             showExpOpt.Click += showExpOpt_Click;
+            //
+            // themeMenuItem
+            //
+            themeMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { themeSystemMenuItem, themeLightMenuItem, themeDarkMenuItem });
+            themeMenuItem.Name = "themeMenuItem";
+            themeMenuItem.Size = new System.Drawing.Size(225, 22);
+            themeMenuItem.Text = "Theme";
+            themeMenuItem.ToolTipText = "Choose light or dark mode, or follow the Windows app theme.";
+            //
+            // themeSystemMenuItem
+            //
+            themeSystemMenuItem.Name = "themeSystemMenuItem";
+            themeSystemMenuItem.Size = new System.Drawing.Size(180, 22);
+            themeSystemMenuItem.Tag = 0;
+            themeSystemMenuItem.Text = "System default";
+            themeSystemMenuItem.Click += themeMenuItem_Click;
+            //
+            // themeLightMenuItem
+            //
+            themeLightMenuItem.Name = "themeLightMenuItem";
+            themeLightMenuItem.Size = new System.Drawing.Size(180, 22);
+            themeLightMenuItem.Tag = 1;
+            themeLightMenuItem.Text = "Light";
+            themeLightMenuItem.Click += themeMenuItem_Click;
+            //
+            // themeDarkMenuItem
+            //
+            themeDarkMenuItem.Name = "themeDarkMenuItem";
+            themeDarkMenuItem.Size = new System.Drawing.Size(180, 22);
+            themeDarkMenuItem.Tag = 2;
+            themeDarkMenuItem.Text = "Dark";
+            themeDarkMenuItem.Click += themeMenuItem_Click;
+            //
+            // helpTooltipsMenuItem
+            //
+            helpTooltipsMenuItem.CheckOnClick = true;
+            helpTooltipsMenuItem.Checked = true;
+            helpTooltipsMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            helpTooltipsMenuItem.Name = "helpTooltipsMenuItem";
+            helpTooltipsMenuItem.Size = new System.Drawing.Size(225, 22);
+            helpTooltipsMenuItem.Text = "Beginner tooltips";
+            helpTooltipsMenuItem.ToolTipText = "Show help tooltips that explain each part of the UI.\r\nTurn this off once you know your way around.";
+            helpTooltipsMenuItem.CheckedChanged += helpTooltips_CheckedChanged;
             // 
             // modelToolStripMenuItem
             // 
@@ -1467,6 +1515,11 @@ namespace AssetStudio.GUI
         private System.Windows.Forms.ToolStripMenuItem extractFolderToolStripMenuItem;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.ToolStripMenuItem showExpOpt;
+        private System.Windows.Forms.ToolStripMenuItem themeMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem themeSystemMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem themeLightMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem themeDarkMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem helpTooltipsMenuItem;
         private GOHierarchy sceneTreeView;
         private System.Windows.Forms.ToolStripMenuItem debugMenuItem;
         private System.Windows.Forms.TabPage tabPage3;

@@ -22,6 +22,7 @@ namespace AssetStudio.GUI
         public AssetBrowser(MainForm form)
         {
             InitializeComponent();
+            Theme.Apply(this);
             _parent = form;
             _columnNames = new List<string>();
             _assetEntries = new List<AssetEntry>();
