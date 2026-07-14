@@ -609,6 +609,9 @@ namespace AssetStudio
         {
             Logger.Verbose("Cleaning up...");
 
+            // Stop any in-flight load loop before closing the streams it is reading from.
+            tokenSource.Cancel();
+
             foreach (var assetsFile in assetsFileList)
             {
                 assetsFile.Objects.Clear();
@@ -647,9 +650,10 @@ namespace AssetStudio
                         Logger.Info("Reading assets has been cancelled !!");
                         return;
                     }
-                    var objectReader = new ObjectReader(assetsFile.reader, assetsFile, objectInfo, Game);
+                    ObjectReader objectReader = null;
                     try
                     {
+                        objectReader = new ObjectReader(assetsFile.reader, assetsFile, objectInfo, Game);
                         Object obj = objectReader.type switch
                         {
                             ClassIDType.Animation when ClassIDType.Animation.CanParse() => new Animation(objectReader),
@@ -692,7 +696,7 @@ namespace AssetStudio
                         sb.AppendLine("Unable to load object")
                             .AppendLine($"Assets {assetsFile.fileName}")
                             .AppendLine($"Path {assetsFile.originalPath}")
-                            .AppendLine($"Type {objectReader.type}")
+                            .AppendLine($"Type {objectReader?.type.ToString() ?? objectInfo.classID.ToString()}")
                             .AppendLine($"PathID {objectInfo.m_PathID}")
                             .Append(e);
                         Logger.Error(sb.ToString());
