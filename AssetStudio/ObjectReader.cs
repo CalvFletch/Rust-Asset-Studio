@@ -45,7 +45,7 @@ namespace AssetStudio
             var pos = Position - byteStart;
             if (pos + count > byteSize)
             {
-                throw new EndOfStreamException("Unable to read beyond the end of the stream.");
+                throw new EndOfStreamException($"Unable to read beyond the end of the stream. (object offset: 0x{pos:X8}, read: 0x{count:X8}, object size: 0x{byteSize:X8}, byteStart: 0x{byteStart:X8}, stream: {BaseStream.GetType().Name}, streamPos: 0x{Position:X8}, streamLen: 0x{BaseStream.Length:X8})");
             }
             return base.Read(buffer, index, count);
         }

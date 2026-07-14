@@ -140,7 +140,7 @@ namespace AssetStudio
                     var compressedBytesSpan = compressedBytes.AsSpan(0, compressedSize);
                     var uncompressedBytesSpan = uncompressedBytes.AsSpan(0, uncompressedSize);
 
-                    reader.Read(compressedBytesSpan);
+                    reader.BaseStream.ReadExactly(compressedBytesSpan);
                     DescrambleEntry(compressedBytesSpan);
 
                     Logger.Verbose($"Descrambled block signature {Convert.ToHexString(compressedBytes, 0, 4)}");

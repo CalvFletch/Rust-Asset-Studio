@@ -531,7 +531,7 @@ namespace AssetStudio
                 }
                 else
                 {
-                    m_IndexBuffer = reader.ReadUInt32Array(m_IndexBuffer_size / 4);
+                    m_IndexBuffer = m_IndexBuffer_size > 0 ? reader.ReadUInt32Array(m_IndexBuffer_size / 4) : Array.Empty<uint>();
                 }
             }
 
@@ -619,7 +619,9 @@ namespace AssetStudio
                 }
                 else
                 {
-                    m_IndexBuffer = reader.ReadUInt32Array(m_IndexBuffer_size / 4);
+                    // ReadUInt32Array(0) would consume an extra int as an implicit count;
+                    // compressed meshes have an empty inline index buffer, so guard it.
+                    m_IndexBuffer = m_IndexBuffer_size > 0 ? reader.ReadUInt32Array(m_IndexBuffer_size / 4) : Array.Empty<uint>();
                 }
             }
 

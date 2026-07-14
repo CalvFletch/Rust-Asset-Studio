@@ -8,16 +8,21 @@ namespace AssetStudio
 
         public static void CopyTo(this Stream source, Stream destination, long size)
         {
+            // Stream.Read may legally return fewer bytes than requested (common on FileStream);
+            // bailing out on a short read silently truncates the copy and corrupts everything
+            // that is carved out of the destination afterwards.
             var buffer = new byte[BufferSize];
-            for (var left = size; left > 0; left -= BufferSize)
+            var left = size;
+            while (left > 0)
             {
                 int toRead = BufferSize < left ? BufferSize : (int)left;
                 int read = source.Read(buffer, 0, toRead);
-                destination.Write(buffer, 0, read);
-                if (read != toRead)
+                if (read == 0)
                 {
-                    return;
+                    throw new EndOfStreamException($"Copy ended early, {left} of {size} bytes were still expected.");
                 }
+                destination.Write(buffer, 0, read);
+                left -= read;
             }
         }
 
