@@ -204,6 +204,7 @@ namespace AssetStudio.GUI
             ResetForm();
             assetsManager.SpecifyUnityVersion = specifyUnityVersion.Text;
             assetsManager.Game = Studio.Game;
+            TryLoadRustAssemblies(paths[0]);
             if (paths.Length == 1 && Directory.Exists(paths[0]))
             {
                 await Task.Run(() => assetsManager.LoadFolder(paths[0]));
@@ -213,6 +214,26 @@ namespace AssetStudio.GUI
                 await Task.Run(() => assetsManager.LoadFiles(paths));
             }
             BuildAssetStructures();
+        }
+
+        private void TryLoadRustAssemblies(string path)
+        {
+            if (assemblyLoader.Loaded)
+            {
+                return;
+            }
+            var gameRoot = RustLocator.GameRootFromPath(path);
+            if (gameRoot == null)
+            {
+                return;
+            }
+            var managed = RustLocator.FindManaged(gameRoot);
+            if (managed == null)
+            {
+                return;
+            }
+            Logger.Info($"Loading managed assemblies from {managed}");
+            assemblyLoader.Load(managed);
         }
 
         private async void loadFile_Click(object sender, EventArgs e)
@@ -225,6 +246,7 @@ namespace AssetStudio.GUI
                 openDirectoryBackup = Path.GetDirectoryName(paths[0]);
                 assetsManager.SpecifyUnityVersion = specifyUnityVersion.Text;
                 assetsManager.Game = Studio.Game;
+                TryLoadRustAssemblies(paths[0]);
                 if (paths.Length == 1 && File.Exists(paths[0]) && Path.GetExtension(paths[0]) == ".txt")
                 {
                     paths = File.ReadAllLines(paths[0]);
@@ -240,13 +262,28 @@ namespace AssetStudio.GUI
             openFolderDialog.InitialFolder = openDirectoryBackup;
             if (openFolderDialog.ShowDialog(this) == DialogResult.OK)
             {
-                ResetForm();
                 openDirectoryBackup = openFolderDialog.Folder;
-                assetsManager.SpecifyUnityVersion = specifyUnityVersion.Text;
-                assetsManager.Game = Studio.Game;
-                await Task.Run(() => assetsManager.LoadFolder(openFolderDialog.Folder));
-                BuildAssetStructures();
+                LoadPaths(openFolderDialog.Folder);
             }
+        }
+
+        private void loadRustBundles_Click(object sender, EventArgs e)
+        {
+            var gameRoot = RustLocator.FindGameRoot();
+            if (gameRoot == null)
+            {
+                Logger.Warning("Could not find a Rust install in any Steam library.");
+                StatusStripUpdate("Rust install not found. Use File -> Load folder to pick the Bundles folder manually.");
+                return;
+            }
+
+            Logger.Info($"Found Rust install: {gameRoot}");
+            if (specifyGame.SelectedIndex != (int)GameType.Rust)
+            {
+                specifyGame.SelectedIndex = (int)GameType.Rust;
+            }
+            openDirectoryBackup = RustLocator.FindBundles(gameRoot);
+            LoadPaths(openDirectoryBackup);
         }
 
         private async void extractFileToolStripMenuItem_Click(object sender, EventArgs e)

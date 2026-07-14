@@ -4,7 +4,7 @@ Goal: make this the best tool for browsing and exporting Rust's game content. Th
 
 ## How Rust's content is organized (background)
 
-- Rust is a standard Unity game (Mono scripting backend, plain unencrypted bundles). Game root layout: `<RustInstall>\Bundles\` holds the asset bundles; `<RustInstall>\RustClient_Data\Managed\` holds the managed assemblies needed to deserialize `MonoBehaviour`s.
+- Rust is a standard Unity game with plain unencrypted bundles. As of the Unity 6 move (`6000.3.x`), the client is IL2CPP (`GameAssembly.dll`, no `Managed` folder); the Mono-based dedicated server still has `RustDedicated_Data\Managed`. Rust's bundles embed typetrees, so `MonoBehaviour`s deserialize fully without any assemblies — verified against the live install (UnityFS v8, `LargeFilesSupport`, 4,883 MonoBehaviours dumped from `items.preload.bundle`).
 - The `Bundles` folder contains a root **AssetBundleManifest** that enumerates every bundle by name. Content is split across bundles (`content.bundle`, `shared\*`, textures, etc.) plus an `assetscenes.bundle` whose serialized files ("CABs") are named like `BuildPlayer-AssetScene-prefabs`; an **`AssetSceneManifest.json`** in the Bundles folder maps those CAB names back to scene names.
 - `content.bundle` contains a **`manifest` MonoBehaviour** (Rust's GameManifest): `prefabProperties` maps a uint hash (the network prefab ID) to a prefab path, and `pooledStrings` maps string-pool hashes to strings. This is the key to resolving entities in demos, map prefab placements, and server data back to actual prefabs.
 - **PathIDs are scoped per serialized file/scene** and can collide across scenes. Components/transforms must be resolved against the owning scene's objects; materials/textures live in globally-unique space. Any cross-bundle resolution needs composite identity (source file + PathID), not bare PathIDs.
@@ -17,8 +17,8 @@ Goal: make this the best tool for browsing and exporting Rust's game content. Th
 ## Phase 1 — Rust as a first-class citizen
 
 - [x] `GameType.Rust` profile, default in GUI and CLI (`--game` now optional).
-- [ ] **Auto-detect the Rust install**: find the Steam library (registry / `libraryfolders.vdf`), offer a one-click "Load Rust Bundles" action.
-- [ ] **Auto-load managed assemblies**: when loading from a path under a Rust install, walk up to the game root and load `RustClient_Data\Managed` into the `AssemblyLoader` automatically so MonoBehaviours deserialize without prompting.
+- [x] **Auto-detect the Rust install**: find the Steam library (registry / `libraryfolders.vdf`), one-click `File → Load Rust bundles` action.
+- [x] **Auto-load managed assemblies**: when loading from a path under a game install with a `*_Data\Managed` folder (e.g. the Mono dedicated server), load it into the `AssemblyLoader` automatically. Not applicable to the IL2CPP client, which embeds typetrees anyway.
 - [ ] **Manifest-driven loading**: parse the root AssetBundleManifest and present a bundle picker instead of eagerly loading tens of GB. Lazy/selective loading is the single biggest UX win for Rust's content size.
 - [ ] Strip the miHoYo-specific UI/requirements from the default experience (no internet-fetched asset indexes, no CN-key prompts) while keeping upstream code mergeable.
 - [ ] Remove/neutralize the "File is encrypted !!" logging path for plain games.
