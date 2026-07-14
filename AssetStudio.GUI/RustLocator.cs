@@ -2,31 +2,87 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace AssetStudio.GUI
 {
+    public record RustInstall(string GameRoot, string BuildId)
+    {
+        public string DisplayName => BuildId != null ? $"Rust [B: {BuildId}] {GameRoot}" : $"Rust {GameRoot}";
+    }
+
     public static class RustLocator
     {
         private const string RustAppId = "252490";
 
-        public static string FindGameRoot()
+        public static List<RustInstall> GetInstalls(IEnumerable<string> customRoots)
         {
+            var installs = new List<RustInstall>();
+
             foreach (var library in GetSteamLibraries())
             {
                 var root = GetRustRootFromLibrary(library);
-                if (root != null)
+                if (root != null && !installs.Any(x => PathEquals(x.GameRoot, root)))
                 {
-                    return root;
+                    var install = new RustInstall(root, TryGetBuildId(root));
+                    installs.Add(install);
+                    Logger.Info($"[RustLocator] Detected Rust install: {install.DisplayName}");
                 }
+            }
+
+            foreach (var custom in customRoots)
+            {
+                if (installs.Any(x => PathEquals(x.GameRoot, custom)))
+                {
+                    continue;
+                }
+                if (FindBundles(custom) == null)
+                {
+                    Logger.Warning($"[RustLocator] Saved Rust location no longer has a Bundles folder, skipping: {custom}");
+                    continue;
+                }
+                var install = new RustInstall(custom, TryGetBuildId(custom));
+                installs.Add(install);
+                Logger.Info($"[RustLocator] Saved Rust install: {install.DisplayName}");
+            }
+
+            if (installs.Count == 0)
+            {
+                Logger.Warning("[RustLocator] No Rust installs found in any Steam library.");
+            }
+
+            return installs;
+        }
+
+        // Accepts a game root, a Bundles folder, or a path inside either, and returns the validated game root.
+        public static string NormalizeGameRoot(string path)
+        {
+            if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
+            {
+                return null;
+            }
+
+            var candidate = Path.GetFullPath(path).TrimEnd(Path.DirectorySeparatorChar);
+            for (var i = 0; i < 4 && !string.IsNullOrEmpty(candidate); i++)
+            {
+                if (FindBundles(candidate) != null)
+                {
+                    return candidate;
+                }
+                candidate = Path.GetDirectoryName(candidate);
             }
             return null;
         }
 
         public static string FindBundles(string gameRoot)
         {
+            // The root AssetBundleManifest is a file named "Bundles" inside the Bundles folder;
+            // its presence distinguishes a real bundle folder from a leftover empty directory.
             var bundles = Path.Combine(gameRoot, "Bundles");
-            return Directory.Exists(bundles) ? bundles : null;
+            return Directory.Exists(bundles) && (File.Exists(Path.Combine(bundles, "Bundles")) || Directory.EnumerateFiles(bundles, "*.bundle", SearchOption.AllDirectories).Any())
+                ? bundles
+                : null;
         }
 
         // The Rust client is IL2CPP (GameAssembly.dll, no Managed folder); the dedicated
@@ -63,13 +119,41 @@ namespace AssetStudio.GUI
             return null;
         }
 
+        // Game roots live at <library>\steamapps\common\<dir>; the appmanifest with the
+        // build id sits two levels up in <library>\steamapps.
+        private static string TryGetBuildId(string gameRoot)
+        {
+            var steamApps = Path.GetDirectoryName(Path.GetDirectoryName(gameRoot));
+            if (steamApps == null)
+            {
+                return null;
+            }
+            var appManifest = Path.Combine(steamApps, $"appmanifest_{RustAppId}.acf");
+            if (!File.Exists(appManifest))
+            {
+                return null;
+            }
+            var match = Regex.Match(File.ReadAllText(appManifest), "\"buildid\"\\s+\"([^\"]+)\"");
+            return match.Success ? match.Groups[1].Value : null;
+        }
+
+        private static bool PathEquals(string a, string b)
+        {
+            return string.Equals(
+                Path.GetFullPath(a).TrimEnd(Path.DirectorySeparatorChar),
+                Path.GetFullPath(b).TrimEnd(Path.DirectorySeparatorChar),
+                StringComparison.OrdinalIgnoreCase);
+        }
+
         private static IEnumerable<string> GetSteamLibraries()
         {
             var steamPath = GetSteamPath();
             if (steamPath == null)
             {
+                Logger.Warning("[RustLocator] Steam not found in the registry.");
                 yield break;
             }
+            Logger.Verbose($"Steam path: {steamPath}");
 
             yield return steamPath;
 

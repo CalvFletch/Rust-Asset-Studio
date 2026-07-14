@@ -334,6 +334,18 @@ namespace AssetStudio.GUI.Properties {
                 this["helpTooltips"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string customRustInstalls {
+            get {
+                return ((string)(this["customRustInstalls"]));
+            }
+            set {
+                this["customRustInstalls"] = value;
+            }
+        }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]

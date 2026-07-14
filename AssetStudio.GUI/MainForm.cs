@@ -94,12 +94,16 @@ namespace AssetStudio.GUI
             InitializeHelperMode();
             InitializeTheme();
             FMODinit();
+            Logger.Info($"Rust Asset Studio v{Application.ProductVersion} started.");
+            Logger.Info($"Log file: {Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "log.txt")}");
+            Logger.Info($"Theme: {(Theme.Dark ? "dark" : "light")} (mode: {Properties.Settings.Default.themeMode switch { 1 => "light", 2 => "dark", _ => "system" }}), beginner tooltips: {(Properties.Settings.Default.helpTooltips ? "on" : "off")}, game profile: {Studio.Game.Name}");
         }
 
         private void InitializeTheme()
         {
             UpdateThemeMenuChecks();
             Theme.Apply(this, Theme.ShouldUseDark(Properties.Settings.Default.themeMode));
+            Theme.ApplyToolStripItems(contextMenuStrip1.Items, Theme.Dark);
         }
 
         private void themeMenuItem_Click(object sender, EventArgs e)
@@ -109,6 +113,9 @@ namespace AssetStudio.GUI
             Properties.Settings.Default.Save();
             UpdateThemeMenuChecks();
             Theme.Apply(this, Theme.ShouldUseDark(mode));
+            Theme.ApplyToolStripItems(contextMenuStrip1.Items, Theme.Dark);
+            Refresh();
+            Logger.Info($"Theme changed to {(Theme.Dark ? "dark" : "light")} (mode: {mode switch { 1 => "light", 2 => "dark", _ => "system" }})");
         }
 
         private void UpdateThemeMenuChecks()
@@ -174,7 +181,7 @@ namespace AssetStudio.GUI
             SetHelperText(fileToolStripMenuItem, "Start here: load Rust bundles to browse their assets.");
             SetHelperText(loadFileToolStripMenuItem, "Open one or more bundle files.\nGood first pick: Bundles\\shared\\items.preload.bundle in your Rust install.");
             SetHelperText(loadFolderToolStripMenuItem, "Load every bundle inside a folder.\nRust's full Bundles folder is 40+ GB, so prefer single bundles while exploring.");
-            SetHelperText(loadRustBundlesToolStripMenuItem, "Auto-detect your Rust install from Steam and load its whole Bundles folder.\nThis is the everything-at-once option: it needs a lot of time and RAM.");
+            SetHelperText(loadRustBundlesToolStripMenuItem, "Your Rust installs, auto-detected from Steam.\nPick one to load its whole Bundles folder, or add a location the detection missed.");
             SetHelperText(extractFileToolStripMenuItem, "Decompress a bundle into raw Unity files on disk, without opening it here.");
             SetHelperText(extractFolderToolStripMenuItem, "Decompress every bundle in a folder into raw Unity files on disk.");
             SetHelperText(resetToolStripMenuItem, "Unload everything and clear the UI.");
@@ -381,23 +388,95 @@ namespace AssetStudio.GUI
             }
         }
 
-        private void loadRustBundles_Click(object sender, EventArgs e)
+        private void loadRustMenu_DropDownOpening(object sender, EventArgs e) => PopulateRustInstallMenu();
+
+        private void PopulateRustInstallMenu()
         {
-            var gameRoot = RustLocator.FindGameRoot();
-            if (gameRoot == null)
+            var dropDown = loadRustBundlesToolStripMenuItem.DropDown;
+            dropDown.Items.Clear();
+            dropDown.ShowItemToolTips = helpTooltipsMenuItem.Checked;
+
+            var installs = RustLocator.GetInstalls(GetCustomRustInstalls());
+            foreach (var install in installs)
             {
-                Logger.Warning("Could not find a Rust install in any Steam library.");
-                StatusStripUpdate("Rust install not found. Use File -> Load folder to pick the Bundles folder manually.");
+                var item = new ToolStripMenuItem(install.DisplayName) { Tag = install.GameRoot };
+                if (helpTooltipsMenuItem.Checked)
+                {
+                    item.ToolTipText = "Load this install's whole Bundles folder.\nThis is the everything-at-once option: it needs a lot of time and RAM.";
+                }
+                item.Click += rustInstallMenuItem_Click;
+                dropDown.Items.Add(item);
+            }
+
+            if (installs.Count == 0)
+            {
+                dropDown.Items.Add(new ToolStripMenuItem("(no Rust installs detected)") { Enabled = false });
+            }
+
+            dropDown.Items.Add(new ToolStripSeparator());
+            var addItem = new ToolStripMenuItem("+ Add Rust install location...");
+            if (helpTooltipsMenuItem.Checked)
+            {
+                addItem.ToolTipText = "Pick a Rust folder the auto-detection missed.\nIt will be remembered in this list.";
+            }
+            addItem.Click += addRustInstall_Click;
+            dropDown.Items.Add(addItem);
+
+            Theme.ApplyToolStripItems(dropDown.Items, Theme.Dark);
+        }
+
+        private List<string> GetCustomRustInstalls()
+        {
+            return Properties.Settings.Default.customRustInstalls
+                .Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList();
+        }
+
+        private void rustInstallMenuItem_Click(object sender, EventArgs e)
+        {
+            var gameRoot = (string)((ToolStripMenuItem)sender).Tag;
+            var bundles = RustLocator.FindBundles(gameRoot);
+            if (bundles == null)
+            {
+                Logger.Warning($"No Bundles folder found under {gameRoot}.");
                 return;
             }
 
-            Logger.Info($"Found Rust install: {gameRoot}");
+            Logger.Info($"Loading Rust install: {gameRoot}");
             if (specifyGame.SelectedIndex != (int)GameType.Rust)
             {
                 specifyGame.SelectedIndex = (int)GameType.Rust;
             }
-            openDirectoryBackup = RustLocator.FindBundles(gameRoot);
-            LoadPaths(openDirectoryBackup);
+            openDirectoryBackup = bundles;
+            LoadPaths(bundles);
+        }
+
+        private void addRustInstall_Click(object sender, EventArgs e)
+        {
+            var openFolderDialog = new OpenFolderDialog();
+            openFolderDialog.Title = "Select a Rust install folder (or its Bundles folder)";
+            if (openFolderDialog.ShowDialog(this) != DialogResult.OK)
+            {
+                return;
+            }
+
+            var gameRoot = RustLocator.NormalizeGameRoot(openFolderDialog.Folder);
+            if (gameRoot == null)
+            {
+                Logger.Warning($"'{openFolderDialog.Folder}' does not look like a Rust install - no Bundles folder with bundles in it.");
+                MessageBox.Show("That folder does not look like a Rust install.\n\nPick the game root (the folder containing Bundles) or the Bundles folder itself.",
+                    "Rust Asset Studio", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            var customs = GetCustomRustInstalls();
+            if (!customs.Any(x => string.Equals(x, gameRoot, StringComparison.OrdinalIgnoreCase)))
+            {
+                customs.Add(gameRoot);
+                Properties.Settings.Default.customRustInstalls = string.Join('\n', customs);
+                Properties.Settings.Default.Save();
+            }
+            Logger.Info($"Added Rust install location: {gameRoot}");
         }
 
         private async void extractFileToolStripMenuItem_Click(object sender, EventArgs e)
@@ -2501,6 +2580,10 @@ namespace AssetStudio.GUI
             Properties.Settings.Default.Save();
 
             Logger.Default.Flags = (LoggerEvent)Properties.Settings.Default.loggerEventType;
+            if (Logger.File != null)
+            {
+                Logger.File.Flags = Logger.Default.Flags;
+            }
         }
 
         private void abortStripMenuItem_Click(object sender, EventArgs e)

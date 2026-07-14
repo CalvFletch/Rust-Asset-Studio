@@ -235,8 +235,8 @@ namespace AssetStudio.GUI
             //
             loadRustBundlesToolStripMenuItem.Name = "loadRustBundlesToolStripMenuItem";
             loadRustBundlesToolStripMenuItem.Size = new System.Drawing.Size(170, 22);
-            loadRustBundlesToolStripMenuItem.Text = "Load Rust bundles";
-            loadRustBundlesToolStripMenuItem.Click += loadRustBundles_Click;
+            loadRustBundlesToolStripMenuItem.Text = "Load Rust";
+            loadRustBundlesToolStripMenuItem.DropDownOpening += loadRustMenu_DropDownOpening;
             // 
             // toolStripMenuItem1
             // 
