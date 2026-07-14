@@ -14,6 +14,12 @@ Goal: make this the best tool for browsing and exporting Rust's game content. Th
 - Many Rust meshes use **rigid skinning**: bone indices without weights. Naive exporters drop skinning; each vertex should get weight 1.0 on its single bone.
 - Prefabs carry LOD groups (LOD0–LOD3), and props use components like `DecorScale`/`DecorOffset`/`DecorAlign`, `BiomeSelector`, and `ConditionalModel` that decide what is actually visible in game.
 
+## Unity 6 compatibility (done)
+
+Upstream Studio v1.36 predates Unity 6; Rust's `6000.3.x` build exposed layout changes in several class readers, all fixed against the embedded typetrees of the live install: Renderer/SkinnedMeshRenderer (ray-tracing accel flags, small-mesh culling, mesh LOD, mask interaction), Texture/Texture2D (fallback-format fields removed, mipmap-limit fields), Shader (SerializedPass editor data removed from player builds, PlayerSubPrograms/stageCounts gates), AnimationClip curve flags, and compressed SpeedTree meshes. Watch for upstream's `version[0] == 2022` gate antipattern when Rust updates Unity again — those checks silently exclude 6000.
+
+Known issue: four SpeedTree foliage meshes (`Tropical* Mesh`, compressed, in `BuildPlayer-AssetScene-props.other.sharedAssets`) fail to parse only when the full Bundles folder is loaded — they parse fine when `assetscenes.bundle` is loaded alone. The errors are caught per-object and everything else loads normally; root cause still to be traced (suspect an interaction in the multi-bundle load path).
+
 ## Phase 1 — Rust as a first-class citizen
 
 - [x] `GameType.Rust` profile, default in GUI and CLI (`--game` now optional).

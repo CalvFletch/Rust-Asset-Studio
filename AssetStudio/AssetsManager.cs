@@ -76,7 +76,11 @@ namespace AssetStudio
             }
 
             MergeSplitAssets(path, true);
-            var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories).ToList();
+            // "*_unpacked" folders are this tool's own large-bundle extraction cache (see BundleFile);
+            // re-scanning them loads stale copies and races against FileMode.Create truncation mid-load.
+            var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories)
+                .Where(x => !x.Contains($"_unpacked{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase))
+                .ToList();
             var toReadFile = ProcessingSplitFiles(files);
             Load(toReadFile);
 
@@ -187,7 +191,9 @@ namespace AssetStudio
                             {
                                 if (!File.Exists(sharedFilePath))
                                 {
-                                    var findFiles = Directory.GetFiles(Path.GetDirectoryName(reader.FullPath), sharedFileName, SearchOption.AllDirectories);
+                                    var findFiles = Directory.GetFiles(Path.GetDirectoryName(reader.FullPath), sharedFileName, SearchOption.AllDirectories)
+                                        .Where(x => !x.Contains($"_unpacked{Path.DirectorySeparatorChar}", StringComparison.OrdinalIgnoreCase))
+                                        .ToArray();
                                     if (findFiles.Length > 0)
                                     {
                                         Logger.Verbose($"Found {findFiles.Length} matching files, picking first file {findFiles[0]} !!");
