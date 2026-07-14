@@ -191,8 +191,14 @@ namespace AssetStudio.GUI
             SetHelperText(exportToolStripMenuItem, "Export assets selected in the Asset List: converted files (png, fbx, wav...),\nraw bytes, readable dumps, or JSON.");
             SetHelperText(filterTypeToolStripMenuItem, "Show only certain asset types in the Asset List.");
             SetHelperText(debugMenuItem, "Logging and diagnostic tools.");
-            SetHelperText(miscToolStripMenuItem, "Advanced tools: build searchable asset maps of a whole game folder\nand browse them with the Asset Browser.");
+            SetHelperText(miscToolStripMenuItem, "Advanced indexing tools. Index Rust's Bundles folder once, then find assets\nand resolve cross-bundle references without loading all 40+ GB.");
             SetHelperText(showExpOpt, "Detailed export settings: output formats, texture type, FBX scale and more.");
+            SetHelperText(buildMapToolStripMenuItem, "Scan a folder (e.g. Rust's Bundles) and build a CABMap: an index of which bundle\ncontains each internal file. With a CABMap loaded, a single bundle can automatically\npull its materials and textures from other bundles.");
+            SetHelperText(buildBothToolStripMenuItem, "Build the CABMap and the AssetMap in one pass.");
+            SetHelperText(clearMapToolStripMenuItem, "Delete previously built maps.");
+            SetHelperText(buildAssetMapToolStripMenuItem, "Scan a folder and export a searchable list of every asset and which bundle holds it,\nwithout keeping anything loaded. Open the result with the Asset Browser.");
+            SetHelperText(loadCABMapToolStripMenuItem, "Load a previously built CABMap so cross-bundle references resolve when loading bundles.");
+            SetHelperText(assetBrowserToolStripMenuItem, "Search a built AssetMap and load only the bundles containing the assets you pick -\nthe fast way to find one item in Rust's 40+ GB of bundles.");
         }
 
         private static void SetHelperText(ToolStripMenuItem item, string text)

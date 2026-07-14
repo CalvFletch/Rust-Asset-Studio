@@ -120,7 +120,22 @@ namespace AssetStudio
                     {
                         var m_MeshShowQuality = reader.ReadByte();
                     }
+                    if (version[0] > 2023 || (version[0] == 2023 && version[1] >= 2)) //2023.2 and up
+                    {
+                        var m_RayTracingAccelStructBuildFlagsOverride = reader.ReadByte();
+                        var m_RayTracingAccelStructBuildFlags = reader.ReadByte();
+                    }
+                    if (version[0] >= 6000) //Unity 6 and up
+                    {
+                        var m_SmallMeshCulling = reader.ReadByte();
+                    }
                     reader.AlignStream();
+                    if (version[0] > 6000 || (version[0] == 6000 && version[1] >= 1)) //6000.1 and up (mesh LOD), verified against Rust 6000.3
+                    {
+                        var m_ForceMeshLod = reader.ReadInt16();
+                        reader.AlignStream();
+                        var m_MeshLodSelectionBias = reader.ReadSingle();
+                    }
                 }
                 else
                 {

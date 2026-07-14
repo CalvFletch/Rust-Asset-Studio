@@ -278,7 +278,7 @@ namespace AssetStudio.GUI
             // 
             // optionsToolStripMenuItem
             // 
-            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { displayAll, toolStripSeparator10, enablePreview, enableModelPreview, modelsOnly, toolStripSeparator11, displayInfo, enableResolveDependencies, allowDuplicates, skipContainer, toolStripSeparator12, toolStripMenuItem14, specifyUnityCNKey, toolStripSeparator13, toolStripMenuItem18, toolStripMenuItem19, themeMenuItem, helpTooltipsMenuItem, showExpOpt });
+            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { displayAll, toolStripSeparator10, enablePreview, enableModelPreview, modelsOnly, toolStripSeparator11, displayInfo, enableResolveDependencies, allowDuplicates, skipContainer, toolStripSeparator12, toolStripMenuItem14, specifyUnityCNKey, toolStripSeparator13, toolStripMenuItem18, themeMenuItem, helpTooltipsMenuItem, showExpOpt });
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             optionsToolStripMenuItem.Text = "Options";
@@ -790,7 +790,7 @@ namespace AssetStudio.GUI
             // 
             // miscToolStripMenuItem
             // 
-            miscToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { MapNameComboBox, buildMapToolStripMenuItem, buildBothToolStripMenuItem, clearMapToolStripMenuItem, toolStripSeparator7, assetMapNameTextBox, buildAssetMapToolStripMenuItem, assetMapTypeMenuItem, toolStripSeparator8, loadAIToolStripMenuItem, loadCABMapToolStripMenuItem, assetBrowserToolStripMenuItem });
+            miscToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { MapNameComboBox, buildMapToolStripMenuItem, buildBothToolStripMenuItem, clearMapToolStripMenuItem, toolStripSeparator7, assetMapNameTextBox, buildAssetMapToolStripMenuItem, assetMapTypeMenuItem, toolStripSeparator8, loadCABMapToolStripMenuItem, assetBrowserToolStripMenuItem });
             miscToolStripMenuItem.Name = "miscToolStripMenuItem";
             miscToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
             miscToolStripMenuItem.Text = "Misc.";

@@ -16,6 +16,10 @@ namespace AssetStudio
 
         public SkinnedMeshRenderer(ObjectReader reader) : base(reader)
         {
+            if (version[0] >= 6000) //Unity 6 and up, verified against Rust 6000.3
+            {
+                var m_MaskInteraction = reader.ReadInt32();
+            }
             int m_Quality = reader.ReadInt32();
             var m_UpdateWhenOffscreen = reader.ReadBoolean();
             var m_SkinNormals = reader.ReadBoolean(); //3.1.0 and below
@@ -40,7 +44,7 @@ namespace AssetStudio
                 m_BlendShapeWeights = reader.ReadSingleArray();
             }
 
-            if (reader.Game.Type.IsGIGroup())
+            if (reader.Game.Type.IsGIGroup() || reader.Game.Type.IsRust())
             {
                 m_RootBone = new PPtr<Transform>(reader);
                 m_AABB = new AABB(reader);
