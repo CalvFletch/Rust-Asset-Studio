@@ -99,6 +99,15 @@ namespace AssetStudio.GUI
             Logger.Info($"Theme: {(Theme.Dark ? "dark" : "light")} (mode: {Properties.Settings.Default.themeMode switch { 1 => "light", 2 => "dark", _ => "system" }}), beginner tooltips: {(Properties.Settings.Default.helpTooltips ? "on" : "off")}, game profile: {Studio.Game.Name}");
         }
 
+        public MainForm(string[] paths) : this()
+        {
+            if (paths.Length > 0)
+            {
+                Logger.Info($"Loading {paths.Length} path(s) from the command line.");
+                Shown += (s, e) => LoadPaths(paths);
+            }
+        }
+
         private void InitializeTheme()
         {
             UpdateThemeMenuChecks();

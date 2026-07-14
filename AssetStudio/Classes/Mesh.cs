@@ -174,6 +174,11 @@ namespace AssetStudio
 
         private void GetStreams(int[] version)
         {
+            if (m_Channels.Count == 0)
+            {
+                m_Streams = new List<StreamInfo>();
+                return;
+            }
             var streamCount = m_Channels.Max(x => x.stream) + 1;
             m_Streams = new List<StreamInfo>();
             uint offset = 0;

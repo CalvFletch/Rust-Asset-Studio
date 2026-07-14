@@ -491,7 +491,7 @@ namespace AssetStudio
             path = reader.ReadAlignedString();
             classID = (ClassIDType)reader.ReadInt32();
             script = new PPtr<MonoScript>(reader);
-            if (version[0] == 2022 && version[1] >= 2) //2022.2 and up
+            if ((version[0] == 2022 && version[1] >= 2) || version[0] >= 2023) //2022.2 and up
             {
                 flags = reader.ReadInt32();
         }
@@ -591,7 +591,7 @@ namespace AssetStudio
             path = reader.ReadAlignedString();
             classID = reader.ReadInt32();
             script = new PPtr<MonoScript>(reader);
-            if (version[0] == 2022 && version[1] >= 2) //2022.2 and up
+            if ((version[0] == 2022 && version[1] >= 2) || version[0] >= 2023) //2022.2 and up
             {
                 flags = reader.ReadInt32();
             }
