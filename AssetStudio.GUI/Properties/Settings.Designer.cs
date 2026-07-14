@@ -310,6 +310,30 @@ namespace AssetStudio.GUI.Properties {
                 this["selectedGame"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int themeMode {
+            get {
+                return ((int)(this["themeMode"]));
+            }
+            set {
+                this["themeMode"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool helpTooltips {
+            get {
+                return ((bool)(this["helpTooltips"]));
+            }
+            set {
+                this["helpTooltips"] = value;
+            }
+        }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]

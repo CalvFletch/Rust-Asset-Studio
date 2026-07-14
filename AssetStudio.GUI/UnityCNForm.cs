@@ -11,6 +11,7 @@ namespace AssetStudio.GUI
         public UnityCNForm()
         {
             InitializeComponent();
+            Theme.Apply(this);
 
             var keys = UnityCNManager.GetEntries();
 

@@ -6,6 +6,7 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<ApplicationIcon>Resources\as.ico</ApplicationIcon>
 		<Product>Rust Asset Studio</Product>
+		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 		<Version>1.36.00</Version>
 		<AssemblyVersion>1.36.00</AssemblyVersion>
 		<FileVersion>1.36.00</FileVersion>

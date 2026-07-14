@@ -14,6 +14,7 @@ namespace AssetStudio.GUI
         public ExportOptions()
         {
             InitializeComponent();
+            Theme.Apply(this);
             assetGroupOptions.SelectedIndex = Properties.Settings.Default.assetGroupOption;
             restoreExtensionName.Checked = Properties.Settings.Default.restoreExtensionName;
             converttexture.Checked = Properties.Settings.Default.convertTexture;
