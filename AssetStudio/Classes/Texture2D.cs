@@ -95,11 +95,11 @@ namespace AssetStudio
             {
                 var m_IsPreProcessed = reader.ReadBoolean();
             }
-            if (version[0] > 2019 || (version[0] == 2019 && version[1] >= 3)) //2019.3 and up
+            if ((version[0] > 2019 || (version[0] == 2019 && version[1] >= 3)) && version[0] < 2023) //2019.3 - 2022.x, removed in 2023+
             {
                 var m_IgnoreMasterTextureLimit = reader.ReadBoolean();
             }
-            if (version[0] == 2022 && version[1] >= 2) //2022.2 and up
+            if ((version[0] == 2022 && version[1] >= 2) || version[0] >= 2023) //2022.2 and up
             {
                 reader.AlignStream(); //m_IgnoreMipmapLimit
                 var m_MipmapLimitGroupName = reader.ReadAlignedString();
