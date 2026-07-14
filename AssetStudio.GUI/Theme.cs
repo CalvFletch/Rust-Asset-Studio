@@ -46,8 +46,44 @@ namespace AssetStudio.GUI
         {
             Dark = dark;
             ToolStripManager.Renderer = dark
-                ? new ToolStripProfessionalRenderer(new DarkColorTable()) { RoundedEdges = false }
+                ? new DarkToolStripRenderer()
                 : new ToolStripProfessionalRenderer();
+        }
+
+        private class DarkToolStripRenderer : ToolStripProfessionalRenderer
+        {
+            public DarkToolStripRenderer() : base(new DarkColorTable())
+            {
+                RoundedEdges = false;
+            }
+
+            protected override void OnRenderArrow(ToolStripArrowRenderEventArgs e)
+            {
+                e.ArrowColor = DarkText;
+                base.OnRenderArrow(e);
+            }
+
+            protected override void OnRenderItemCheck(ToolStripItemImageRenderEventArgs e)
+            {
+                var rect = e.ImageRectangle;
+                using var back = new SolidBrush(Color.FromArgb(70, 70, 74));
+                e.Graphics.FillRectangle(back, rect);
+                ControlPaint.DrawMenuGlyph(e.Graphics, rect, MenuGlyph.Checkmark, DarkText, Color.FromArgb(70, 70, 74));
+            }
+
+            protected override void OnRenderStatusStripSizingGrip(ToolStripRenderEventArgs e)
+            {
+                using var dot = new SolidBrush(DarkBorder);
+                var right = e.ToolStrip.Width - 6;
+                var bottom = e.ToolStrip.Height - 6;
+                for (var i = 0; i < 3; i++)
+                {
+                    for (var j = 0; i + j < 3; j++)
+                    {
+                        e.Graphics.FillRectangle(dot, right - i * 4, bottom - j * 4, 2, 2);
+                    }
+                }
+            }
         }
 
         public static void Apply(Form form, bool dark)
@@ -208,6 +244,47 @@ namespace AssetStudio.GUI
         }
 
         private static readonly HashSet<Control> hookedControls = new HashSet<Control>();
+        private static readonly List<TabPanePainter> tabPainters = new List<TabPanePainter>();
+
+        // TabControl natively paints a light 3D border around the page area that owner-draw
+        // cannot reach; repaint those edges after every WM_PAINT while dark mode is active.
+        private sealed class TabPanePainter : NativeWindow
+        {
+            private const int WM_PAINT = 0x000F;
+            private readonly TabControl tab;
+
+            public TabPanePainter(TabControl tab)
+            {
+                this.tab = tab;
+                if (tab.IsHandleCreated)
+                {
+                    AssignHandle(tab.Handle);
+                }
+                tab.HandleCreated += (s, e) => AssignHandle(tab.Handle);
+                tab.HandleDestroyed += (s, e) => ReleaseHandle();
+            }
+
+            protected override void WndProc(ref Message m)
+            {
+                base.WndProc(ref m);
+                if (m.Msg == WM_PAINT && Dark && tab.TabCount > 0)
+                {
+                    using var g = Graphics.FromHwnd(tab.Handle);
+                    using var region = new Region(tab.ClientRectangle);
+                    region.Exclude(tab.DisplayRectangle);
+                    for (var i = 0; i < tab.TabCount; i++)
+                    {
+                        region.Exclude(tab.GetTabRect(i));
+                    }
+                    using var back = new SolidBrush(DarkBack);
+                    g.FillRegion(back, region);
+                    var border = tab.DisplayRectangle;
+                    border.Inflate(1, 1);
+                    using var pen = new Pen(DarkBorder);
+                    g.DrawRectangle(pen, border);
+                }
+            }
+        }
 
         private static void EnsureTabControlHook(TabControl tab)
         {
@@ -215,6 +292,7 @@ namespace AssetStudio.GUI
             {
                 return;
             }
+            tabPainters.Add(new TabPanePainter(tab));
             tab.DrawItem += (s, e) =>
             {
                 var tc = (TabControl)s;

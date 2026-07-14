@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <TargetFrameworks>net7.0;net8.0</TargetFrameworks>
-    <Version>1.36.00</Version>
-    <AssemblyVersion>1.36.00</AssemblyVersion>
-    <FileVersion>1.36.00</FileVersion>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0</AssemblyVersion>
+    <FileVersion>1.0.0</FileVersion>
     <Copyright>Copyright © Perfare 2020-2022; Copyright © hozuki 2020</Copyright>
     <DebugType>embedded</DebugType>
   </PropertyGroup>

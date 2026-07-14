@@ -29,7 +29,7 @@ namespace AssetStudio
                 {
                     try
                     {
-                        File = new FileLogger();
+                        File = new FileLogger { Flags = Default.Flags };
                     }
                     catch
                     {
