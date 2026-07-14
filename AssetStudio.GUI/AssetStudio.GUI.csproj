@@ -7,9 +7,9 @@
 		<ApplicationIcon>Resources\as.ico</ApplicationIcon>
 		<Product>Rust Asset Studio</Product>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-		<Version>1.0.0</Version>
-		<AssemblyVersion>1.0.0</AssemblyVersion>
-		<FileVersion>1.0.0</FileVersion>
+		<Version>1.0.1</Version>
+		<AssemblyVersion>1.0.1</AssemblyVersion>
+		<FileVersion>1.0.1</FileVersion>
 		<Copyright>Copyright © Razmoth 2022; Copyright © Perfare 2018-2022</Copyright>
 		<DebugType>embedded</DebugType>
 	</PropertyGroup>
