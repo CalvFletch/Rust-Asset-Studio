@@ -63,8 +63,6 @@ namespace AssetStudio
         public ResourceReader image_data;
         public StreamingInfo m_StreamData;
 
-        private static bool HasGNFTexture(SerializedType type) => type.Match("1D52BB98AA5F54C67C22C39E8B2E400F");
-        private static bool HasExternalMipRelativeOffset(SerializedType type) => type.Match("1D52BB98AA5F54C67C22C39E8B2E400F", "5390A985F58D5524F95DB240E8789704");
         public Texture2D(ObjectReader reader) : base(reader)
         {
             m_Width = reader.ReadInt32();
@@ -86,10 +84,6 @@ namespace AssetStudio
             if (version[0] > 2 || (version[0] == 2 && version[1] >= 6)) //2.6.0 and up
             {
                 var m_IsReadable = reader.ReadBoolean();
-                if (reader.Game.Type.IsGI() && HasGNFTexture(reader.serializedType))
-                {
-                    var m_IsGNFTexture = reader.ReadBoolean();
-                }
             }
             if (version[0] >= 2020) //2020.1 and up
             {
@@ -116,10 +110,6 @@ namespace AssetStudio
                 var m_StreamingMipmaps = reader.ReadBoolean();
             }
             reader.AlignStream();
-            if (reader.Game.Type.IsGI() && HasGNFTexture(reader.serializedType))
-            {
-                var m_TextureGroup = reader.ReadInt32();
-            }
             if (version[0] > 2018 || (version[0] == 2018 && version[1] >= 2)) //2018.2 and up
             {
                 var m_StreamingMipmapsPriority = reader.ReadInt32();
@@ -143,10 +133,6 @@ namespace AssetStudio
             var image_data_size = reader.ReadInt32();
             if (image_data_size == 0 && ((version[0] == 5 && version[1] >= 3) || version[0] > 5))//5.3.0 and up
             {
-                if (reader.Game.Type.IsGI() && HasExternalMipRelativeOffset(reader.serializedType))
-                {
-                    var m_externalMipRelativeOffset = reader.ReadUInt32();
-                }
                 m_StreamData = new StreamingInfo(reader);
             }
 

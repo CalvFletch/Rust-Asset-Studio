@@ -673,19 +673,6 @@ namespace AssetStudio
             m_Grab = reader.ReadSingle();
         }
 
-        public static HandPose ParseGI(ObjectReader reader)
-        {
-            var handPose = new HandPose();
-
-            handPose.m_GrabX = reader.ReadXForm4();
-            handPose.m_DoFArray = reader.ReadSingleArray(20);
-            handPose.m_Override = reader.ReadSingle();
-            handPose.m_CloseOpen = reader.ReadSingle();
-            handPose.m_InOut = reader.ReadSingle();
-            handPose.m_Grab = reader.ReadSingle();
-
-            return handPose;
-        }
     }
 
     public class HumanGoal
@@ -710,22 +697,6 @@ namespace AssetStudio
             }
         }
 
-        public static HumanGoal ParseGI(ObjectReader reader)
-        {
-            var humanGoal = new HumanGoal();
-
-            humanGoal.m_X = reader.ReadXForm4();
-            humanGoal.m_WeightT = reader.ReadSingle();
-            humanGoal.m_WeightR = reader.ReadSingle();
-
-            humanGoal.m_HintT = (Vector3)reader.ReadVector4();
-            humanGoal.m_HintWeightT = reader.ReadSingle();
-
-            var m_HintR = (Vector3)reader.ReadVector4();
-            var m_HintWeightR = reader.ReadSingle();
-
-            return humanGoal;
-        }
     }
 
     public class HumanPose
@@ -765,192 +736,6 @@ namespace AssetStudio
                 }
             }
 
-        public static HumanPose ParseGI(ObjectReader reader)
-        {
-            var version = reader.version;
-            var humanPose = new HumanPose();
-
-            humanPose.m_RootX = reader.ReadXForm4();
-            humanPose.m_LookAtPosition = (Vector3)reader.ReadVector4();
-            humanPose.m_LookAtWeight = reader.ReadVector4();
-
-            humanPose.m_GoalArray = new List<HumanGoal>();
-            for (int i = 0; i < 4; i++)
-            {
-                humanPose.m_GoalArray.Add(HumanGoal.ParseGI(reader));
-            }
-
-            humanPose.m_LeftHandPose = HandPose.ParseGI(reader);
-            humanPose.m_RightHandPose = HandPose.ParseGI(reader);
-
-            humanPose.m_DoFArray = reader.ReadSingleArray(0x37);
-
-            humanPose.m_TDoFArray = reader.ReadVector4Array(0x15).Select(x => (Vector3)x).ToArray();
-
-            reader.Position += 4;
-
-            return humanPose;
-        }
-    }
-
-    public abstract class ACLClip
-    {
-        public virtual bool IsSet => false;
-        public virtual uint CurveCount => 0;
-        public abstract void Read(ObjectReader reader);
-    }
-
-    public class EmptyACLClip : ACLClip
-    {
-        public override void Read(ObjectReader reader) { }
-    }
-
-    public class MHYACLClip : ACLClip
-    {
-        public uint m_CurveCount;
-        public uint m_ConstCurveCount;
-
-        public byte[] m_ClipData;
-
-        public override bool IsSet => !m_ClipData.IsNullOrEmpty();
-        public override uint CurveCount => m_CurveCount;
-
-        public MHYACLClip()
-        {
-            m_CurveCount = 0;
-            m_ConstCurveCount = 0;
-            m_ClipData = Array.Empty<byte>();
-        }
-        public override void Read(ObjectReader reader)
-        {
-            var byteCount = reader.ReadInt32();
-
-            if (reader.Game.Type.IsSRGroup())
-            {
-                byteCount *= 4;
-            }
-
-            m_ClipData = reader.ReadBytes(byteCount);
-            reader.AlignStream();
-
-            m_CurveCount = reader.ReadUInt32();
-
-            if (reader.Game.Type.IsSRGroup())
-            {
-                m_ConstCurveCount = reader.ReadUInt32();
-            }
-        }
-    }
-
-    public class AclTransformTrackIDToBindingCurveID
-    {
-        public uint rotationIDToBindingCurveID;
-        public uint positionIDToBindingCurveID;
-        public uint scaleIDToBindingCurveID;
-        public AclTransformTrackIDToBindingCurveID(ObjectReader reader)
-        {
-            rotationIDToBindingCurveID = reader.ReadUInt32();
-            positionIDToBindingCurveID = reader.ReadUInt32();
-            scaleIDToBindingCurveID = reader.ReadUInt32();
-        }
-    }
-
-    public class LnDACLClip : ACLClip
-    {
-        public uint m_CurveCount;
-        public byte[] m_ClipData;
-
-        public override bool IsSet => !m_ClipData.IsNullOrEmpty();
-        public override uint CurveCount => m_CurveCount;
-        public override void Read(ObjectReader reader)
-        {
-            m_CurveCount = reader.ReadUInt32();
-            var compressedTransformTracksSize = reader.ReadUInt32();
-            var compressedScalarTracksSize = reader.ReadUInt32();
-            var aclTransformCount = reader.ReadUInt32();
-            var aclScalarCount = reader.ReadUInt32();
-
-            var compressedTransformTracksCount = reader.ReadInt32() * 0x10;
-            var compressedTransformTracks = reader.ReadBytes(compressedTransformTracksCount);
-            var compressedScalarTracksCount = reader.ReadInt32() * 0x10;
-            var compressedScalarTracks = reader.ReadBytes(compressedScalarTracksCount);
-
-            int numaclTransformTrackIDToBindingCurveID = reader.ReadInt32();
-            var aclTransformTrackIDToBindingCurveID = new List<AclTransformTrackIDToBindingCurveID>();
-            for (int i = 0; i < numaclTransformTrackIDToBindingCurveID; i++)
-            {
-                aclTransformTrackIDToBindingCurveID.Add(new AclTransformTrackIDToBindingCurveID(reader));
-            }
-            var aclScalarTrackIDToBindingCurveID = reader.ReadUInt32Array();
-        }
-    }
-
-    public class GIACLClip : ACLClip
-    {
-        public uint m_CurveCount;
-        public uint m_ConstCurveCount;
-
-        public byte[] m_ClipData;
-        public byte[] m_DatabaseData;
-
-        public override bool IsSet => !m_ClipData.IsNullOrEmpty() && !m_DatabaseData.IsNullOrEmpty();
-        public override uint CurveCount => m_CurveCount;
-
-        public GIACLClip()
-        {
-            m_CurveCount = 0;
-            m_ConstCurveCount = 0;
-            m_ClipData = Array.Empty<byte>();
-            m_DatabaseData = Array.Empty<byte>();
-        }
-
-        public override void Read(ObjectReader reader)
-        {
-            var aclTracksCount = (int)reader.ReadUInt64();
-            var aclTracksOffset = reader.Position + reader.ReadInt64();
-            var aclTracksCurveCount = reader.ReadUInt32();
-            if (aclTracksOffset > reader.Length)
-            {
-                throw new IOException("Offset outside of range");
-            }
-
-            var pos = reader.Position;
-            reader.Position = aclTracksOffset;
-
-            var tracksBytes = reader.ReadBytes(aclTracksCount);
-            reader.AlignStream();
-
-            using var tracksMS = new MemoryStream();
-            tracksMS.Write(tracksBytes);
-            tracksMS.AlignStream();
-            m_CurveCount = aclTracksCurveCount;
-            m_ClipData = tracksMS.ToArray();
-
-            reader.Position = pos;
-
-            var aclDatabaseCount = reader.ReadInt32();
-            var aclDatabaseOffset = reader.Position + reader.ReadInt64();
-            var aclDatabaseCurveCount = (uint)reader.ReadUInt64();
-            if (aclDatabaseOffset > reader.Length)
-            {
-                throw new IOException("Offset outside of range");
-            }
-
-            pos = reader.Position;
-            reader.Position = aclDatabaseOffset;
-
-            var databaseBytes = reader.ReadBytes(aclDatabaseCount);
-            reader.AlignStream();
-
-            using var databaseMS = new MemoryStream();
-            databaseMS.Write(databaseBytes);
-            databaseMS.AlignStream();
-
-            m_ConstCurveCount = aclDatabaseCurveCount;
-            m_DatabaseData = databaseMS.ToArray();
-
-            reader.Position = pos;
-        }
     }
 
     public class StreamedClip
@@ -963,29 +748,6 @@ namespace AssetStudio
         {
             data = reader.ReadUInt32Array();
             curveCount = reader.ReadUInt32();
-        }
-        public static StreamedClip ParseGI(ObjectReader reader)
-        {
-            var streamedClipCount = (int)reader.ReadUInt64();
-            var streamedClipOffset = reader.Position + reader.ReadInt64();
-            var streamedClipCurveCount = (uint)reader.ReadUInt64();
-            if (streamedClipOffset > reader.Length)
-            {
-                throw new IOException("Offset outside of range");
-            }
-
-            var pos = reader.Position;
-            reader.Position = streamedClipOffset;
-
-            var streamedClip = new StreamedClip()
-            {
-                data = reader.ReadUInt32Array(streamedClipCount),
-                curveCount = streamedClipCurveCount
-            };
-
-            reader.Position = pos;
-
-            return streamedClip;
         }
 
         public class StreamedCurveKey
@@ -1092,133 +854,6 @@ namespace AssetStudio
             m_BeginTime = reader.ReadSingle();
             m_SampleArray = reader.ReadSingleArray();
         }
-        public static DenseClip ParseGI(ObjectReader reader)
-        {
-            var denseClip = new DenseClip();
-
-            denseClip.m_FrameCount = reader.ReadInt32();
-            denseClip.m_CurveCount = reader.ReadUInt32();
-            denseClip.m_SampleRate = reader.ReadSingle();
-            denseClip.m_BeginTime = reader.ReadSingle();
-
-            var denseClipCount = (int)reader.ReadUInt64();
-            var denseClipOffset = reader.Position + reader.ReadInt64();
-            if (denseClipOffset > reader.Length)
-            {
-                throw new IOException("Offset outside of range");
-            }
-
-            var pos = reader.Position;
-            reader.Position = denseClipOffset;
-
-            denseClip.m_SampleArray = reader.ReadSingleArray(denseClipCount);
-
-            reader.Position = pos;
-
-            return denseClip;
-        }
-    }
-    public class ArkDenseClip : DenseClip
-    {
-        public int m_ACLType;
-        public byte[] m_ACLArray;
-        public float m_PositionFactor;
-        public float m_EulerFactor;
-        public float m_ScaleFactor;
-        public float m_FloatFactor;
-        public uint m_nPositionCurves;
-        public uint m_nRotationCurves;
-        public uint m_nEulerCurves;
-        public uint m_nScaleCurves;
-
-        public ArkDenseClip(ObjectReader reader) : base(reader)
-        {
-            m_ACLType = reader.ReadInt32();
-            m_ACLArray = reader.ReadUInt8Array();
-            reader.AlignStream();
-            m_PositionFactor = reader.ReadSingle();
-            m_EulerFactor = reader.ReadSingle();
-            m_ScaleFactor = reader.ReadSingle();
-            m_FloatFactor = reader.ReadSingle();
-            m_nPositionCurves = reader.ReadUInt32();
-            m_nRotationCurves = reader.ReadUInt32();
-            m_nEulerCurves = reader.ReadUInt32();
-            m_nScaleCurves = reader.ReadUInt32();
-
-            Process();
-        }
-
-        private void Process()
-        {
-            if (m_ACLType == 0 || !m_SampleArray.IsNullOrEmpty())
-            {
-                return;
-            }
-
-            var sampleArray = new List<float>();
-
-            var size = m_ACLType >> 2;
-            var factor = (float)((1 << m_ACLType) - 1);
-            var aclSpan = m_ACLArray.ToUInt4Array().AsSpan();
-            var buffer = (stackalloc byte[8]);
-
-            for (int i = 0; i < m_FrameCount; i++)
-            {
-                var index = i * (int)(m_CurveCount * size);
-                for (int j = 0; j < m_nPositionCurves; j++)
-                {
-                    sampleArray.Add(ReadCurve(aclSpan, m_PositionFactor, ref index));
-                }
-                for (int j = 0; j < m_nRotationCurves; j++)
-                {
-                    sampleArray.Add(ReadCurve(aclSpan, 1.0f, ref index));
-                }
-                for (int j = 0; j < m_nEulerCurves; j++)
-                {
-                    sampleArray.Add(ReadCurve(aclSpan, m_EulerFactor, ref index));
-                }
-                for (int j = 0; j < m_nScaleCurves; j++)
-                {
-                    sampleArray.Add(ReadCurve(aclSpan, m_ScaleFactor, ref index));
-                }
-                var m_nFloatCurves = m_CurveCount - (m_nPositionCurves + m_nRotationCurves + m_nEulerCurves + m_nScaleCurves);
-                for (int j = 0; j < m_nFloatCurves; j++)
-                {
-                    sampleArray.Add(ReadCurve(aclSpan, m_FloatFactor, ref index));
-                }
-            }
-
-            m_SampleArray = sampleArray.ToArray();
-        }
-
-        private float ReadCurve(Span<byte> aclSpan, float curveFactor, ref int curveIndex)
-        {
-            var buffer = (stackalloc byte[8]);
-
-            var curveSize = m_ACLType >> 2;
-            var factor = (float)((1 << m_ACLType) - 1);
-
-            aclSpan.Slice(curveIndex, curveSize).CopyTo(buffer);
-            var temp = buffer.ToArray().ToUInt8Array(0, curveSize);
-            buffer.Clear();
-            temp.CopyTo(buffer);
-
-            float curve;
-            var value = BitConverter.ToUInt64(buffer);
-            if (value != 0)
-            {
-                curve = ((value / factor) - 0.5f) * 2;
-            }
-            else
-            {
-                curve = -1.0f;
-            }
-
-            curve *= curveFactor;
-            curveIndex += curveSize;
-
-            return curve;
-        }
     }
 
     public class ConstantClip
@@ -1229,25 +864,6 @@ namespace AssetStudio
         public ConstantClip(ObjectReader reader)
         {
             data = reader.ReadSingleArray();
-        }
-        public static ConstantClip ParseGI(ObjectReader reader)
-        {
-            var constantClipCount = (int)reader.ReadUInt64();
-            var constantClipOffset = reader.Position + reader.ReadInt64();
-            if (constantClipOffset > reader.Length)
-            {
-                throw new IOException("Offset outside of range");
-            }
-
-            var pos = reader.Position;
-            reader.Position = constantClipOffset;
-
-            var constantClip = new ConstantClip();
-            constantClip.data = reader.ReadSingleArray(constantClipCount);
-
-            reader.Position = pos;
-
-            return constantClip;
         }
     }
 
@@ -1288,7 +904,6 @@ namespace AssetStudio
 
     public class Clip
     {
-        public ACLClip m_ACLClip = new EmptyACLClip();
         public StreamedClip m_StreamedClip;
         public DenseClip m_DenseClip;
         public ConstantClip m_ConstantClip;
@@ -1299,59 +914,15 @@ namespace AssetStudio
         {
             var version = reader.version;
             m_StreamedClip = new StreamedClip(reader);
-            if (reader.Game.Type.IsArknightsEndfield())
-            {
-                m_DenseClip = new ArkDenseClip(reader);
-            }
-            else
-            {
-                m_DenseClip = new DenseClip(reader);
-            }
-            if (reader.Game.Type.IsSRGroup())
-            {
-                m_ACLClip = new MHYACLClip();
-                m_ACLClip.Read(reader);
-            }
+            m_DenseClip = new DenseClip(reader);
             if (version[0] > 4 || (version[0] == 4 && version[1] >= 3)) //4.3 and up
             {
                 m_ConstantClip = new ConstantClip(reader);
-            }
-            if (reader.Game.Type.IsGIGroup() || reader.Game.Type.IsBH3Group() || reader.Game.Type.IsZZZCB1())
-            {
-                m_ACLClip = new MHYACLClip();
-                m_ACLClip.Read(reader);
-            }
-            if (reader.Game.Type.IsLoveAndDeepspace())
-            {
-                m_ACLClip = new LnDACLClip();
-                m_ACLClip.Read(reader);
             }
             if (version[0] < 2018 || (version[0] == 2018 && version[1] < 3)) //2018.3 down
             {
                 m_Binding = new ValueArrayConstant(reader);
             }
-        }
-        public static Clip ParseGI(ObjectReader reader)
-        {
-            var clipOffset = reader.Position + reader.ReadInt64();
-            if (clipOffset > reader.Length)
-            {
-                throw new IOException("Offset outside of range");
-            }
-
-            var pos = reader.Position;
-            reader.Position = clipOffset;
-
-            var clip = new Clip();
-            clip.m_StreamedClip = StreamedClip.ParseGI(reader);
-            clip.m_DenseClip = DenseClip.ParseGI(reader);
-            clip.m_ConstantClip = ConstantClip.ParseGI(reader);
-            clip.m_ACLClip = new GIACLClip();
-            clip.m_ACLClip.Read(reader);
-
-            reader.Position = pos;
-
-            return clip;
         }
 
         public AnimationClipBindingConstant ConvertValueArrayToGenericBinding()
@@ -1442,35 +1013,23 @@ namespace AssetStudio
         public bool m_KeepOriginalPositionY;
         public bool m_KeepOriginalPositionXZ;
         public bool m_HeightFromFeet;
-        public static bool HasShortIndexArray(SerializedType type) => type.Match("E708B1872AE48FD688AC012DF4A7A178") || type.Match("055AA41C7639327940F8900103A10356");
         public ClipMuscleConstant() { }
 
         public ClipMuscleConstant(ObjectReader reader)
         {
             var version = reader.version;
-            if (reader.Game.Type.IsLoveAndDeepspace())
+            m_DeltaPose = new HumanPose(reader);
+            m_StartX = reader.ReadXForm();
+            if (version[0] > 5 || (version[0] == 5 && version[1] >= 5))//5.5 and up
             {
-                m_StartX = reader.ReadXForm();
-                if (version[0] > 5 || (version[0] == 5 && version[1] >= 5))//5.5 and up
-                {
-                    m_StopX = reader.ReadXForm();
-                }
+                m_StopX = reader.ReadXForm();
             }
-            else
+            m_LeftFootStartX = reader.ReadXForm();
+            m_RightFootStartX = reader.ReadXForm();
+            if (version[0] < 5)//5.0 down
             {
-                m_DeltaPose = new HumanPose(reader);
-                m_StartX = reader.ReadXForm();
-                if (version[0] > 5 || (version[0] == 5 && version[1] >= 5))//5.5 and up
-                {
-                    m_StopX = reader.ReadXForm();
-                }
-                m_LeftFootStartX = reader.ReadXForm();
-                m_RightFootStartX = reader.ReadXForm();
-                if (version[0] < 5)//5.0 down
-                {
-                    m_MotionStartX = reader.ReadXForm();
-                    m_MotionStopX = reader.ReadXForm();
-                }
+                m_MotionStartX = reader.ReadXForm();
+                m_MotionStopX = reader.ReadXForm();
             }
             m_AverageSpeed = version[0] > 5 || (version[0] == 5 && version[1] >= 4) ? reader.ReadVector3() : (Vector3)reader.ReadVector4();//5.4 and up
             m_Clip = new Clip(reader);
@@ -1481,14 +1040,7 @@ namespace AssetStudio
             m_CycleOffset = reader.ReadSingle();
             m_AverageAngularSpeed = reader.ReadSingle();
 
-            if (reader.Game.Type.IsSR() && HasShortIndexArray(reader.serializedType))
-            {
-                m_IndexArray = reader.ReadInt16Array().Select(x => (int)x).ToArray();
-            }
-            else
-            {
-                m_IndexArray = reader.ReadInt32Array();
-            }
+            m_IndexArray = reader.ReadInt32Array();
             if (version[0] < 4 || (version[0] == 4 && version[1] < 3)) //4.3 down
             {
                 var m_AdditionalCurveIndexArray = reader.ReadInt32Array();
@@ -1522,77 +1074,6 @@ namespace AssetStudio
             m_KeepOriginalPositionXZ = reader.ReadBoolean();
             m_HeightFromFeet = reader.ReadBoolean();
             reader.AlignStream();
-        }
-        public static ClipMuscleConstant ParseGI(ObjectReader reader)
-        {
-            var version = reader.version;
-            var clipMuscleConstant = new ClipMuscleConstant();
-
-            clipMuscleConstant.m_DeltaPose = HumanPose.ParseGI(reader);
-            clipMuscleConstant.m_StartX = reader.ReadXForm4();
-            clipMuscleConstant.m_StopX = reader.ReadXForm4();
-            clipMuscleConstant.m_LeftFootStartX = reader.ReadXForm4();
-            clipMuscleConstant.m_RightFootStartX = reader.ReadXForm4();
-
-            clipMuscleConstant.m_AverageSpeed = (Vector3)reader.ReadVector4();
-
-            clipMuscleConstant.m_Clip = Clip.ParseGI(reader);
-
-            clipMuscleConstant.m_StartTime = reader.ReadSingle();
-            clipMuscleConstant.m_StopTime = reader.ReadSingle();
-            clipMuscleConstant.m_OrientationOffsetY = reader.ReadSingle();
-            clipMuscleConstant.m_Level = reader.ReadSingle();
-            clipMuscleConstant.m_CycleOffset = reader.ReadSingle();
-            clipMuscleConstant.m_AverageAngularSpeed = reader.ReadSingle();
-
-            clipMuscleConstant.m_IndexArray = reader.ReadInt16Array(0xC8).Select(x => (int)x).ToArray();
-
-            var valueArrayDeltaCount = (int)reader.ReadUInt64();
-            var valueArrayDeltaOffset = reader.Position + reader.ReadInt64();
-
-            if (valueArrayDeltaOffset > reader.Length)
-            {
-                throw new IOException("Offset outside of range");
-            }
-
-            var valueArrayReferencePoseCount = (int)reader.ReadUInt64();
-            var valueArrayReferencePoseOffset = reader.Position + reader.ReadInt64();
-
-            if (valueArrayReferencePoseOffset > reader.Length)
-            {
-                throw new IOException("Offset outside of range");
-            }
-
-            clipMuscleConstant.m_Mirror = reader.ReadBoolean();
-            clipMuscleConstant.m_LoopTime = reader.ReadBoolean();
-            clipMuscleConstant.m_LoopBlend = reader.ReadBoolean();
-            clipMuscleConstant.m_LoopBlendOrientation = reader.ReadBoolean();
-            clipMuscleConstant.m_LoopBlendPositionY = reader.ReadBoolean();
-            clipMuscleConstant.m_LoopBlendPositionXZ = reader.ReadBoolean();
-            clipMuscleConstant.m_StartAtOrigin = reader.ReadBoolean();
-            clipMuscleConstant.m_KeepOriginalOrientation = reader.ReadBoolean();
-            clipMuscleConstant.m_KeepOriginalPositionY = reader.ReadBoolean();
-            clipMuscleConstant.m_KeepOriginalPositionXZ = reader.ReadBoolean();
-            clipMuscleConstant.m_HeightFromFeet = reader.ReadBoolean();
-            reader.AlignStream();
-
-            if (valueArrayDeltaCount > 0)
-            {
-                reader.Position = valueArrayDeltaOffset;
-                clipMuscleConstant.m_ValueArrayDelta = new List<ValueDelta>();
-                for (int i = 0; i < valueArrayDeltaCount; i++)
-                {
-                    clipMuscleConstant.m_ValueArrayDelta.Add(new ValueDelta(reader));
-                }
-            }
-
-            if (valueArrayReferencePoseCount > 0)
-            {
-                reader.Position = valueArrayReferencePoseOffset;
-                clipMuscleConstant.m_ValueArrayReferencePose = reader.ReadSingleArray(valueArrayReferencePoseCount);
-            }
-
-            return clipMuscleConstant;
         }
         public YAMLNode ExportYAML(int[] version)
         {
@@ -1815,8 +1296,6 @@ namespace AssetStudio
         public List<AnimationEvent> m_Events;
         public StreamingInfo m_StreamData;
 
-        private bool hasStreamingInfo = false;
-
         public AnimationClip(ObjectReader reader) : base(reader)
         {
             if (version[0] >= 5)//5.0 and up
@@ -1832,19 +1311,6 @@ namespace AssetStudio
             else
             {
                 m_Legacy = true;
-            }
-            if (reader.Game.Type.IsLoveAndDeepspace())
-            {
-                reader.AlignStream();
-                var m_aclTransformCache = reader.ReadUInt8Array();
-                var m_aclScalarCache = reader.ReadUInt8Array();
-                int numaclTransformTrackId2CurveId = reader.ReadInt32();
-                var m_aclTransformTrackId2CurveId = new List<AclTransformTrackIDToBindingCurveID>();
-                for (int i = 0; i < numaclTransformTrackId2CurveId; i++)
-                {
-                    m_aclTransformTrackId2CurveId.Add(new AclTransformTrackIDToBindingCurveID(reader));
-                }
-                var m_aclScalarTrackId2CurveId = reader.ReadUInt32Array();
             }
             m_Compressed = reader.ReadBoolean();
             if (version[0] > 4 || (version[0] == 4 && version[1] >= 3))//4.3 and up
@@ -1909,49 +1375,14 @@ namespace AssetStudio
 
             m_SampleRate = reader.ReadSingle();
             m_WrapMode = reader.ReadInt32();
-            if (reader.Game.Type.IsArknightsEndfield())
-            {
-                var m_aclType = reader.ReadInt32();
-            }
             if (version[0] > 3 || (version[0] == 3 && version[1] >= 4)) //3.4 and up
             {
                 m_Bounds = new AABB(reader);
             }
             if (version[0] >= 4)//4.0 and up
             {
-                if (reader.Game.Type.IsGI())
-                {
-                    var muscleClipSize = reader.ReadInt32();
-                    if (muscleClipSize < 0)
-                    {
-                        hasStreamingInfo = true;
-                        m_MuscleClipSize = reader.ReadUInt32();
-                        var pos = reader.Position;
-                        m_MuscleClip = ClipMuscleConstant.ParseGI(reader);
-                        reader.Position = pos + m_MuscleClipSize;
-                    }
-                    else if (muscleClipSize > 0)
-                    {
-                        m_MuscleClipSize = (uint)muscleClipSize;
-                        m_MuscleClip = new ClipMuscleConstant(reader);
-                    }
-                }
-                else
-                {
-                    m_MuscleClipSize = reader.ReadUInt32();
-                    m_MuscleClip = new ClipMuscleConstant(reader);
-                }
-            }
-            if (reader.Game.Type.IsSRGroup())
-            {
-                var m_AclClipData = reader.ReadUInt8Array();
-                var aclBindingsCount = reader.ReadInt32();
-                var m_AclBindings = new List<GenericBinding>();
-                for (int i = 0; i < aclBindingsCount; i++)
-                {
-                    m_AclBindings.Add(new GenericBinding(reader));
-                }
-                var m_AclRange = new KeyValuePair<float, float>(reader.ReadSingle(), reader.ReadSingle());
+                m_MuscleClipSize = reader.ReadUInt32();
+                m_MuscleClip = new ClipMuscleConstant(reader);
             }
             if (version[0] > 4 || (version[0] == 4 && version[1] >= 3)) //4.3 and up
             {
@@ -1972,23 +1403,6 @@ namespace AssetStudio
             if (version[0] >= 2017) //2017 and up
             {
                 reader.AlignStream();
-            }
-            if (hasStreamingInfo)
-            {
-                m_StreamData = new StreamingInfo(reader);
-                if (!string.IsNullOrEmpty(m_StreamData?.path))
-                {
-                    var aclClip = m_MuscleClip.m_Clip.m_ACLClip as GIACLClip;
-
-                    var resourceReader = new ResourceReader(m_StreamData.path, assetsFile, m_StreamData.offset, m_StreamData.size);
-                    using var ms = new MemoryStream();
-                    ms.Write(aclClip.m_DatabaseData);
-
-                    ms.Write(resourceReader.GetData());
-                    ms.AlignStream();
-
-                    aclClip.m_DatabaseData = ms.ToArray();
-                }
             }
         }
     }

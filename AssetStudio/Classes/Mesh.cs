@@ -320,7 +320,7 @@ namespace AssetStudio
             }
             hasNormals = reader.ReadBoolean();
             hasTangents = reader.ReadBoolean();
-            if (!reader.Game.Type.IsLoveAndDeepspace() && version[0] > 4 || (version[0] == 4 && version[1] >= 3)) //4.3 and up
+            if (version[0] > 4 || (version[0] == 4 && version[1] >= 3)) //4.3 and up
             {
                 reader.AlignStream();
             }
@@ -370,11 +370,6 @@ namespace AssetStudio
                     shapes.Add(new MeshBlendShape(reader));
                 }
 
-                if (reader.Game.Type.IsLoveAndDeepspace())
-                {
-                    reader.AlignStream();
-                }
-
                 int numChannels = reader.ReadInt32();
                 channels = new List<MeshBlendShapeChannel>();
                 for (int i = 0; i < numChannels; i++)
@@ -383,35 +378,6 @@ namespace AssetStudio
                 }
 
                 fullWeights = reader.ReadSingleArray();
-                if (reader.Game.Type.IsLoveAndDeepspace())
-                {
-                    var varintVerticesSize = reader.ReadInt32();
-                    if (varintVerticesSize > 0)
-                    {
-                        var pos = reader.Position;
-                        while (reader.Position < pos + varintVerticesSize)
-                        {
-                            var value = reader.ReadUInt32();
-                            var index = value & 0x0FFFFFFF;
-                            var flags = value >> 0x1D;
-                            var blendShapeVertex = new BlendShapeVertex
-                            {
-                                index = index,
-                                vertex = (flags & 4) != 0 ? reader.ReadVector3() : Vector3.Zero,
-                                normal = (flags & 2) != 0 ? reader.ReadVector3() : Vector3.Zero,
-                                tangent = (flags & 1) != 0 ? reader.ReadVector3() : Vector3.Zero,
-                            };
-                            vertices.Add(blendShapeVertex);
-                        }
-                        reader.AlignStream();
-
-                        var stride = (uint)(varintVerticesSize / vertices.Count);
-                        foreach (var shape in shapes)
-                        {
-                            shape.firstVertex /= stride;
-                        }
-                    }
-                }
             }
             else
             {
@@ -505,7 +471,6 @@ namespace AssetStudio
         private VertexData m_VertexData;
         private CompressedMesh m_CompressedMesh;
         private StreamingInfo m_StreamData;
-        private bool m_CollisionMeshBaked = false;
 
         public List<uint> m_Indices = new List<uint>();
 
@@ -576,27 +541,10 @@ namespace AssetStudio
                         var m_StreamCompression = reader.ReadByte();
                     }
                     var m_IsReadable = reader.ReadBoolean();
-                    if (reader.Game.Type.IsBH3())
-                    {
-                        var m_IsHighPrecisionPosition = reader.ReadBoolean();
-                        var m_IsHighPrecisionTangent = reader.ReadBoolean();
-                        var m_IsHighPrecisionUv = reader.ReadBoolean();
-                    }
                     var m_KeepVertices = reader.ReadBoolean();
                     var m_KeepIndices = reader.ReadBoolean();
-                    if (reader.Game.Type.IsArknightsEndfield())
-                    {
-                        var m_CollisionMeshOnly = reader.ReadBoolean();
-                        m_CollisionMeshBaked = reader.ReadBoolean();
-                        var m_CollisionMeshConvex = reader.ReadBoolean();
-                    }
                 }
                 reader.AlignStream();
-                if (reader.Game.Type.IsGISubGroup())
-                {
-                    var m_PackSkinDataToUV2UV3 = reader.ReadBoolean();
-                    reader.AlignStream();
-                }
 
                 //Unity fixed it in 2017.3.1p1 and later versions
                 if ((version[0] > 2017 || (version[0] == 2017 && version[1] >= 4)) || //2017.4
@@ -686,7 +634,7 @@ namespace AssetStudio
                 m_VertexData = new VertexData(reader);
             }
 
-            if ((version[0] > 2 || (version[0] == 2 && version[1] >= 6)) && !m_CollisionMeshBaked) //2.6.0 and later
+            if (version[0] > 2 || (version[0] == 2 && version[1] >= 6)) //2.6.0 and later
             {
                 m_CompressedMesh = new CompressedMesh(reader);
             }
@@ -720,44 +668,13 @@ namespace AssetStudio
                 reader.AlignStream();
                 var m_BakedTriangleCollisionMesh = reader.ReadUInt8Array();
                 reader.AlignStream();
-                if (reader.Game.Type.IsBH3())
-                {
-                    var m_MeshOptimized = reader.ReadBoolean();
-                }
             }
 
-            if (reader.Game.Type.IsZZZCB1())
-            {
-                var m_CloseMeshDynamicCompression = reader.ReadBoolean();
-                reader.AlignStream();
-
-                var m_CompressLevelVertexData = reader.ReadInt32();
-                var m_CompressLevelNormalAndTangent = reader.ReadInt32();
-                var m_CompressLevelTexCoordinates = reader.ReadInt32();
-            }
-
-            if (reader.Game.Type.IsGIGroup() || version[0] > 2018 || (version[0] == 2018 && version[1] >= 2)) //2018.2 and up
+            if (version[0] > 2018 || (version[0] == 2018 && version[1] >= 2)) //2018.2 and up
             {
                 var m_MeshMetrics = new float[2];
                 m_MeshMetrics[0] = reader.ReadSingle();
                 m_MeshMetrics[1] = reader.ReadSingle();
-                if (reader.Game.Type.IsArknightsEndfield())
-                {
-                    var m_MeshMetrics2 = reader.ReadSingle();
-                }
-            }
-
-            if (reader.Game.Type.IsGIGroup())
-            {
-                var m_MetricsDirty = reader.ReadBoolean();
-                reader.AlignStream();
-                var m_CloseMeshDynamicCompression = reader.ReadBoolean();
-                reader.AlignStream();
-                if (!reader.Game.Type.IsGICB1() && !reader.Game.Type.IsGIPack())
-                {
-                    var m_IsStreamingMesh = reader.ReadBoolean();
-                    reader.AlignStream();
-                }
             }
 
             if (version[0] > 2018 || (version[0] == 2018 && version[1] >= 3)) //2018.3 and up
@@ -782,11 +699,6 @@ namespace AssetStudio
             if (version[0] > 3 || (version[0] == 3 && version[1] >= 5)) //3.5 and up
             {
                 ReadVertexData();
-            }
-
-            if (m_CollisionMeshBaked)
-            {
-                return;
             }
 
             if ((version[0] > 2 || (version[0] == 2 && version[1] >= 6))) //2.6.0 and later

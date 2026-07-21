@@ -44,7 +44,7 @@ namespace AssetStudio
                 m_BlendShapeWeights = reader.ReadSingleArray();
             }
 
-            if (reader.Game.Type.IsGIGroup() || reader.Game.Type.IsRust())
+            if (reader.Game.Type.IsRust())
             {
                 m_RootBone = new PPtr<Transform>(reader);
                 m_AABB = new AABB(reader);

@@ -71,10 +71,6 @@ namespace AssetStudio
             m_StateMachineMotionSetIndex = reader.ReadUInt32();
             m_BodyMask = new HumanPoseMask(reader);
             m_SkeletonMask = new SkeletonMask(reader);
-            if (reader.Game.Type.IsLoveAndDeepspace())
-            {
-                var m_GenericMask = new SkeletonMask(reader);
-            }
             m_Binding = reader.ReadUInt32();
             m_LayerBlendingMode = reader.ReadInt32();
             if (version[0] > 4 || (version[0] == 4 && version[1] >= 2)) //4.2 and up
@@ -295,10 +291,6 @@ namespace AssetStudio
                 || (version[0] == 4 && version[1] == 1 && version[2] >= 3)) //4.1.3 and up
             {
                 m_CycleOffset = reader.ReadSingle();
-                if (reader.Game.Type.IsArknightsEndfield())
-                {
-                    var m_StateNameHash = reader.ReadUInt32();
-                }
                 m_Mirror = reader.ReadBoolean();
                 reader.AlignStream();
             }
@@ -417,12 +409,6 @@ namespace AssetStudio
             if (version[0] > 4 || (version[0] == 4 && version[1] >= 1)) //4.1 and up
             {
                 m_Mirror = reader.ReadBoolean();
-            }
-
-            if (reader.Game.Type.IsArknightsEndfield())
-            {
-                var m_SyncGroupID = reader.ReadUInt32();
-                var m_SyncGroupRole = reader.ReadUInt32();
             }
 
             reader.AlignStream();

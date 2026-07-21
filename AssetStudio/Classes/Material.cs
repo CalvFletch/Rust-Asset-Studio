@@ -14,10 +14,6 @@ namespace AssetStudio
             m_Texture = new PPtr<Texture>(reader);
             m_Scale = reader.ReadVector2();
             m_Offset = reader.ReadVector2();
-            if (reader.Game.Type.IsArknightsEndfield())
-            {
-                var m_UVSetIndex = reader.ReadInt32();
-            }
         }
     }
 
@@ -110,11 +106,6 @@ namespace AssetStudio
                 var m_CustomRenderQueue = reader.ReadInt32();
             }
 
-            if (reader.Game.Type.IsLoveAndDeepspace())
-            {
-                var m_MaterialType = reader.ReadUInt32();
-            }
-
             if (version[0] > 5 || (version[0] == 5 && version[1] >= 1)) //5.1 and up
             {
                 var stringTagMapSize = reader.ReadInt32();
@@ -123,11 +114,6 @@ namespace AssetStudio
                     var first = reader.ReadAlignedString();
                     var second = reader.ReadAlignedString();
                 }
-            }
-
-            if (reader.Game.Type.IsNaraka())
-            {
-                var value = reader.ReadInt32();
             }
 
             if (version[0] > 5 || (version[0] == 5 && version[1] >= 6)) //5.6 and up
