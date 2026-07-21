@@ -270,10 +270,6 @@ namespace AssetStudio
                     }
                 }
             }
-            catch (InvalidCastException)
-            {
-                Logger.Error($"Game type mismatch, Expected {nameof(Mr0k)} but got {Game.Name} ({Game.GetType().Name}) !!");
-            }
             catch (Exception e)
             {
                 var str = $"Error while reading bundle file {reader.FullPath}";

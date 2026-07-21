@@ -290,6 +290,11 @@ namespace AssetStudio.GUI
                 assetMapTypeMenuItem.DropDownItems.Add(menuItem);
             }
 
+            if (Properties.Settings.Default.selectedGame >= GameManager.Count)
+            {
+                Properties.Settings.Default.selectedGame = 0;
+                Properties.Settings.Default.Save();
+            }
             specifyGame.Items.AddRange(GameManager.GetGames());
             specifyGame.SelectedIndex = Properties.Settings.Default.selectedGame;
             specifyGame.SelectedIndexChanged += new EventHandler(specifyGame_SelectedIndexChanged);
