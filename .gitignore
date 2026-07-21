@@ -340,3 +340,5 @@ ASALocalRun/
 healthchecksdb
 /AssetStudioCLI/Properties/launchSettings.json
 /AssetStudioGUI/Properties/launchSettings.json
+# Internal planning docs - keep out of the public repo
+docs/

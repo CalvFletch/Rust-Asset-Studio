@@ -6,7 +6,7 @@ Rust ships as a standard Unity game with unencrypted asset bundles, but its cont
 
 ## Status
 
-Early days, but working: current Rust (Unity 6, `6000.3.x`) bundles load and parse, including full `MonoBehaviour` data via the embedded typetrees. See [docs/ROADMAP.md](docs/ROADMAP.md) for where it's headed.
+Early days, but working: current Rust (Unity 6, `6000.3.x`) bundles load and parse, including full `MonoBehaviour` data via the embedded typetrees.
 
 ## Quick start (GUI)
 
