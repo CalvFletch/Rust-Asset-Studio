@@ -26,19 +26,6 @@ namespace AssetStudio.CLI
                     return;
                 }
 
-                if (game.Type.IsUnityCN())
-                {
-                    if (!UnityCNManager.TryGetEntry(o.KeyIndex, out var unityCN))
-                    {
-                        Console.WriteLine("Invalid key index !!");
-                        Console.WriteLine($"Available Options: \n{UnityCNManager.ToString()}");
-                        return;
-                    }
-
-                    UnityCN.SetKey(unityCN);
-                    Logger.Info($"[UnityCN] Selected Key is {unityCN}");
-                }
-
                 Studio.Game = game;
                 Logger.Default = new ConsoleLogger() { Flags = o.LoggerFlags.Aggregate((e, x) => e |= x) };
                 Logger.FileLogging = Settings.Default.enableFileLogging;
@@ -74,17 +61,6 @@ namespace AssetStudio.CLI
                 assetsManager.Game = game;
                 assetsManager.SpecifyUnityVersion = o.UnityVersion;
                 o.Output.Create();
-
-                if (o.Key != default)
-                {
-                    MiHoYoBinData.Encrypted = true;
-                    MiHoYoBinData.Key = o.Key;
-                }
-
-                if (o.AIFile != null && game.Type.IsGISubGroup())
-                {
-                    ResourceIndex.FromFile(o.AIFile.FullName);
-                }
 
                 if (o.DummyDllFolder != null)
                 {

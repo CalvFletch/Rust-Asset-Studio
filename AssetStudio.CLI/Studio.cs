@@ -197,58 +197,15 @@ namespace AssetStudio.CLI
             return extractedCount;
         }
 
-        public static void UpdateContainers()
-        {
-            if (exportableAssets.Count > 0)
-            {
-                Logger.Info("Updating Containers...");
-                foreach (var asset in exportableAssets)
-                {
-                    if (int.TryParse(asset.Container, out var value))
-                    {
-                        var last = unchecked((uint)value);
-                        var name = Path.GetFileNameWithoutExtension(asset.SourceFile.originalPath);
-                        if (uint.TryParse(name, out var id))
-                        {
-                            var path = ResourceIndex.GetContainer(id, last);
-                            if (!string.IsNullOrEmpty(path))
-                            {
-                                asset.Container = path;
-                                if (asset.Type == ClassIDType.MiHoYoBinData)
-                                {
-                                    asset.Text = Path.GetFileNameWithoutExtension(path);
-                                }
-                            }
-                        }
-                    }
-                }
-                Logger.Info("Updated !!");
-            }
-        }
-
         public static void BuildAssetData(ClassIDType[] typeFilters, Regex[] nameFilters, Regex[] containerFilters, ref int i)
         {
             var objectAssetItemDic = new Dictionary<Object, AssetItem>();
-            var mihoyoBinDataNames = new List<(PPtr<Object>, string)>();
             var containers = new List<(PPtr<Object>, string)>();
             foreach (var assetsFile in assetsManager.assetsFileList)
             {
                 foreach (var asset in assetsFile.Objects)
                 {
-                    ProcessAssetData(asset, typeFilters, nameFilters, objectAssetItemDic, mihoyoBinDataNames, containers, ref i);
-                }
-            }
-            foreach ((var pptr, var name) in mihoyoBinDataNames)
-            {
-                if (pptr.TryGet<MiHoYoBinData>(out var obj))
-                {
-                    var assetItem = objectAssetItemDic[obj];
-                    if (int.TryParse(name, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var hash))
-                    {
-                        assetItem.Text = name;
-                        assetItem.Container = hash.ToString();
-                    }
-                    else assetItem.Text = $"BinFile #{assetItem.m_PathID}";
+                    ProcessAssetData(asset, typeFilters, nameFilters, objectAssetItemDic, containers, ref i);
                 }
             }
             if (!SkipContainer)
@@ -269,14 +226,10 @@ namespace AssetStudio.CLI
                     }
                 }
                 containers.Clear();
-                if (Game.Type.IsGISubGroup())
-                {
-                    UpdateContainers();
-                }
             }
         }
 
-        public static void ProcessAssetData(Object asset, ClassIDType[] typeFilters, Regex[] nameFilters, Dictionary<Object, AssetItem> objectAssetItemDic, List<(PPtr<Object>, string)> mihoyoBinDataNames, List<(PPtr<Object>, string)> containers, ref int i) 
+        public static void ProcessAssetData(Object asset, ClassIDType[] typeFilters, Regex[] nameFilters, Dictionary<Object, AssetItem> objectAssetItemDic, List<(PPtr<Object>, string)> containers, ref int i)
         {
             var assetItem = new AssetItem(asset);
             objectAssetItemDic.Add(asset, assetItem);
@@ -319,14 +272,6 @@ namespace AssetStudio.CLI
 
                     exportable = ClassIDType.AssetBundle.CanExport();
                     break;
-                case IndexObject m_IndexObject:
-                    foreach (var index in m_IndexObject.AssetMap)
-                    {
-                        mihoyoBinDataNames.Add((index.Value.Object, index.Key));
-                    }
-
-                    exportable = ClassIDType.IndexObject.CanExport();
-                    break;
                 case ResourceManager m_ResourceManager:
                     foreach (var m_Container in m_ResourceManager.m_Container)
                     {
@@ -342,7 +287,6 @@ namespace AssetStudio.CLI
                 case MovieTexture _ when ClassIDType.MovieTexture.CanExport():
                 case Sprite _ when ClassIDType.Sprite.CanExport():
                 case Material _ when ClassIDType.Material.CanExport():
-                case MiHoYoBinData _ when ClassIDType.MiHoYoBinData.CanExport():
                 case Shader _ when ClassIDType.Shader.CanExport():
                 case Animator _ when ClassIDType.Animator.CanExport():
                     exportable = true;

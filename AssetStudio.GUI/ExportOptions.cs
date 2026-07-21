@@ -41,8 +41,6 @@ namespace AssetStudio.GUI
             fbxVersion.SelectedIndex = Properties.Settings.Default.fbxVersion;
             fbxFormat.SelectedIndex = Properties.Settings.Default.fbxFormat;
             collectAnimations.Checked = Properties.Settings.Default.collectAnimations;
-            encrypted.Checked = Properties.Settings.Default.encrypted;
-            key.Value = Properties.Settings.Default.key;
             minimalAssetMap.Checked = Properties.Settings.Default.minimalAssetMap;
             types = JsonConvert.DeserializeObject<Dictionary<ClassIDType, (bool, bool)>>(Properties.Settings.Default.types);
             uvs = JsonConvert.DeserializeObject<Dictionary<string, (bool, int)>>(Properties.Settings.Default.uvs);
@@ -79,15 +77,11 @@ namespace AssetStudio.GUI
             Properties.Settings.Default.fbxVersion = fbxVersion.SelectedIndex;
             Properties.Settings.Default.fbxFormat = fbxFormat.SelectedIndex;
             Properties.Settings.Default.collectAnimations = collectAnimations.Checked;
-            Properties.Settings.Default.encrypted = encrypted.Checked;
-            Properties.Settings.Default.key = (byte)key.Value;
             Properties.Settings.Default.minimalAssetMap = minimalAssetMap.Checked;
             Properties.Settings.Default.types = JsonConvert.SerializeObject(types);
             Properties.Settings.Default.uvs = JsonConvert.SerializeObject(uvs);
             Properties.Settings.Default.texs = JsonConvert.SerializeObject(texs);
             Properties.Settings.Default.Save();
-            MiHoYoBinData.Key = (byte)key.Value;
-            MiHoYoBinData.Encrypted = encrypted.Checked;
             AssetsHelper.Minimal = Properties.Settings.Default.minimalAssetMap;
             TypeFlags.SetTypes(types);
             DialogResult = DialogResult.OK;

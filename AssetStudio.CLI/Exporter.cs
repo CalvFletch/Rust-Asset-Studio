@@ -106,46 +106,6 @@ namespace AssetStudio.CLI
             return true;
         }
 
-        public static bool ExportMiHoYoBinData(AssetItem item, string exportPath)
-        {
-            string exportFullPath;
-            if (item.Asset is MiHoYoBinData m_MiHoYoBinData)
-            {
-                switch (m_MiHoYoBinData.Type)
-                {
-                    case MiHoYoBinDataType.JSON:
-
-                        if (!TryExportFile(exportPath, item, ".json", out exportFullPath))
-                            return false;
-                        var json = m_MiHoYoBinData.Dump() as string;
-                        if (json.Length != 0)
-                        {
-                            File.WriteAllText(exportFullPath, json);
-                            return true;
-                        }
-                        break;
-                    case MiHoYoBinDataType.Bytes:
-                        var extension = ".bin";
-                        if (Properties.Settings.Default.restoreExtensionName)
-                        {
-                            if (!string.IsNullOrEmpty(item.Container))
-                            {
-                                extension = Path.GetExtension(item.Container);
-                            }
-                        }
-                        if (!TryExportFile(exportPath, item, extension, out exportFullPath))
-                            return false;
-                        var bytes = m_MiHoYoBinData.Dump() as byte[];
-                        if (!bytes.IsNullOrEmpty())
-                        {
-                            File.WriteAllBytes(exportFullPath, bytes);
-                            return true;
-                        }
-                        break;
-                }
-            }
-            return false;
-        }
 
         public static bool ExportFont(AssetItem item, string exportPath)
         {
@@ -470,8 +430,6 @@ namespace AssetStudio.CLI
                     return ExportAnimator(item, exportPath);
                 case ClassIDType.AnimationClip:
                     return ExportAnimationClip(item, exportPath);
-                case ClassIDType.MiHoYoBinData:
-                    return ExportMiHoYoBinData(item, exportPath);
                 case ClassIDType.Material:
                     return ExportJSONFile(item, exportPath);
                 default:

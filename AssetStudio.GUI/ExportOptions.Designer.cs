@@ -53,8 +53,6 @@ namespace AssetStudio.GUI
             label7 = new Label();
             openAfterExport = new CheckBox();
             restoreExtensionName = new CheckBox();
-            key = new NumericUpDown();
-            encrypted = new CheckBox();
             convertAudio = new CheckBox();
             panel1 = new Panel();
             totga = new RadioButton();
@@ -81,9 +79,7 @@ namespace AssetStudio.GUI
             exportAllNodes = new CheckBox();
             eulerFilter = new CheckBox();
             exportUvsTooltip = new ToolTip(components);
-            keyToolTip = new ToolTip(components);
             groupBox1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)key).BeginInit();
             panel1.SuspendLayout();
             groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)scaleFactor).BeginInit();
@@ -133,8 +129,6 @@ namespace AssetStudio.GUI
             groupBox1.Controls.Add(label7);
             groupBox1.Controls.Add(openAfterExport);
             groupBox1.Controls.Add(restoreExtensionName);
-            groupBox1.Controls.Add(key);
-            groupBox1.Controls.Add(encrypted);
             groupBox1.Controls.Add(convertAudio);
             groupBox1.Controls.Add(panel1);
             groupBox1.Controls.Add(converttexture);
@@ -318,31 +312,7 @@ namespace AssetStudio.GUI
             restoreExtensionName.TabIndex = 9;
             restoreExtensionName.Text = "Restore TextAsset extension name";
             restoreExtensionName.UseVisualStyleBackColor = true;
-            // 
-            // key
-            // 
-            key.Hexadecimal = true;
-            key.Location = new System.Drawing.Point(186, 103);
-            key.Margin = new Padding(4, 3, 4, 3);
-            key.Maximum = new decimal(new int[] { 255, 0, 0, 0 });
-            key.Name = "key";
-            key.Size = new System.Drawing.Size(55, 23);
-            key.TabIndex = 8;
-            keyToolTip.SetToolTip(key, "Key in hex");
-            // 
-            // encrypted
-            // 
-            encrypted.AutoSize = true;
-            encrypted.Checked = true;
-            encrypted.CheckState = CheckState.Checked;
-            encrypted.Location = new System.Drawing.Point(7, 104);
-            encrypted.Margin = new Padding(4, 3, 4, 3);
-            encrypted.Name = "encrypted";
-            encrypted.Size = new System.Drawing.Size(166, 19);
-            encrypted.TabIndex = 12;
-            encrypted.Text = "Encrypted MiHoYoBinData\r\n";
-            encrypted.UseVisualStyleBackColor = true;
-            // 
+            //
             // convertAudio
             // 
             convertAudio.AutoSize = true;
@@ -672,7 +642,6 @@ namespace AssetStudio.GUI
             TopMost = true;
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)key).EndInit();
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             groupBox2.ResumeLayout(false);
@@ -717,9 +686,6 @@ namespace AssetStudio.GUI
         private System.Windows.Forms.CheckBox openAfterExport;
         private System.Windows.Forms.ToolTip exportUvsTooltip;
         private System.Windows.Forms.CheckBox collectAnimations;
-        private System.Windows.Forms.CheckBox encrypted;
-        private System.Windows.Forms.NumericUpDown key;
-        private System.Windows.Forms.ToolTip keyToolTip;
         private System.Windows.Forms.CheckBox minimalAssetMap;
         private System.Windows.Forms.Label label7;
         private Label label6;

@@ -244,8 +244,6 @@ namespace AssetStudio.GUI
             skipContainer.Checked = Properties.Settings.Default.skipContainer;
             assetsManager.ResolveDependencies = enableResolveDependencies.Checked;
             SkipContainer = Properties.Settings.Default.skipContainer;
-            MiHoYoBinData.Encrypted = Properties.Settings.Default.encrypted;
-            MiHoYoBinData.Key = Properties.Settings.Default.key;
             AssetsHelper.Minimal = Properties.Settings.Default.minimalAssetMap;
         }
 
@@ -298,11 +296,6 @@ namespace AssetStudio.GUI
             Studio.Game = GameManager.GetGame(Properties.Settings.Default.selectedGame);
             TypeFlags.SetTypes(JsonConvert.DeserializeObject<Dictionary<ClassIDType, (bool, bool)>>(Properties.Settings.Default.types));
             Logger.Info($"Target Game type is {Studio.Game.Type}");
-
-            if (Studio.Game.Type.IsUnityCN())
-            {
-                UnityCNManager.SetKey(Properties.Settings.Default.selectedUnityCNKey);
-            }
 
             MapNameComboBox.SelectedIndexChanged += new EventHandler(specifyNameComboBox_SelectedIndexChanged);
             if (!string.IsNullOrEmpty(Properties.Settings.Default.selectedCABMapName))
@@ -555,10 +548,6 @@ namespace AssetStudio.GUI
                 {
                     productName = Studio.Game.Name;
                 }
-                else if (Studio.Game.Type.IsUnityCN() && UnityCNManager.TryGetEntry(Properties.Settings.Default.selectedUnityCNKey, out var unityCN))
-                {
-                    productName = unityCN.Name;
-                }
                 else
                 {
                     productName = "no productName";
@@ -750,7 +739,6 @@ namespace AssetStudio.GUI
                     case ClassIDType.Shader:
                     case ClassIDType.TextAsset:
                     case ClassIDType.MonoBehaviour:
-                    case ClassIDType.MiHoYoBinData:
                         textPreviewBox.Visible = !textPreviewBox.Visible;
                         break;
                     case ClassIDType.Font:
@@ -1113,10 +1101,6 @@ namespace AssetStudio.GUI
                         break;
                     case AnimationClip m_AnimationClip:
                         PreviewAnimationClip(m_AnimationClip);
-                        break;
-                    case MiHoYoBinData m_MiHoYoBinData:
-                        PreviewText(m_MiHoYoBinData.AsString);
-                        StatusStripUpdate("Can be exported/previewed as JSON if data is a valid JSON (check XOR).");
                         break;
                     default:
                         var str = assetItem.Asset.Dump();
@@ -2294,11 +2278,6 @@ namespace AssetStudio.GUI
             Studio.Game = GameManager.GetGame(Properties.Settings.Default.selectedGame);
             Logger.Info($"Target Game is {Studio.Game.Name}");
 
-            if (Studio.Game.Type.IsUnityCN())
-            {
-                UnityCNManager.SetKey(Properties.Settings.Default.selectedUnityCNKey);
-            }
-
             assetsManager.SpecifyUnityVersion = specifyUnityVersion.Text;
             assetsManager.Game = Studio.Game;
         }
@@ -2598,12 +2577,6 @@ namespace AssetStudio.GUI
         {
             assetBrowser = new AssetBrowser(this);
             assetBrowser.Show();
-        }
-
-        private void specifyUnityCNKey_Click(object sender, EventArgs e)
-        {
-            var unitycn = new UnityCNForm();
-            unitycn.Show();
         }
 
         #region FMOD

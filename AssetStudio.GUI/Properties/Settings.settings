@@ -62,13 +62,7 @@
     <Setting Name="restoreExtensionName" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
-    <Setting Name="key" Type="System.Byte" Scope="User">
-      <Value Profile="(Default)">147</Value>
-    </Setting>
     <Setting Name="enableConsole" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
-    </Setting>
-    <Setting Name="encrypted" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="selectedGame" Type="System.Int32" Scope="User">
@@ -94,9 +88,6 @@
     </Setting>
     <Setting Name="enableModelPreview" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
-    </Setting>
-    <Setting Name="selectedUnityCNKey" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="selectedCABMapName" Type="System.String" Scope="User">
       <Value Profile="(Default)" />

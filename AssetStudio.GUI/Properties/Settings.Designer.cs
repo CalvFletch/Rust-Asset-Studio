@@ -265,18 +265,6 @@ namespace AssetStudio.GUI.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("147")]
-        public byte key {
-            get {
-                return ((byte)(this["key"]));
-            }
-            set {
-                this["key"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
         public bool enableConsole {
             get {
@@ -284,18 +272,6 @@ namespace AssetStudio.GUI.Properties {
             }
             set {
                 this["enableConsole"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool encrypted {
-            get {
-                return ((bool)(this["encrypted"]));
-            }
-            set {
-                this["encrypted"] = value;
             }
         }
         
@@ -428,18 +404,6 @@ namespace AssetStudio.GUI.Properties {
             }
             set {
                 this["enableModelPreview"] = value;
-            }
-        }
-        
-        [global::System.Configuration.UserScopedSettingAttribute()]
-        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int selectedUnityCNKey {
-            get {
-                return ((int)(this["selectedUnityCNKey"]));
-            }
-            set {
-                this["selectedUnityCNKey"] = value;
             }
         }
         

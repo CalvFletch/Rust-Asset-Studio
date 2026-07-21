@@ -57,7 +57,6 @@ namespace AssetStudio.GUI
             toolStripSeparator12 = new System.Windows.Forms.ToolStripSeparator();
             toolStripMenuItem14 = new System.Windows.Forms.ToolStripMenuItem();
             specifyUnityVersion = new System.Windows.Forms.ToolStripTextBox();
-            specifyUnityCNKey = new System.Windows.Forms.ToolStripMenuItem();
             toolStripSeparator13 = new System.Windows.Forms.ToolStripSeparator();
             toolStripMenuItem18 = new System.Windows.Forms.ToolStripMenuItem();
             specifyGame = new System.Windows.Forms.ToolStripComboBox();
@@ -271,7 +270,7 @@ namespace AssetStudio.GUI
             // 
             // optionsToolStripMenuItem
             // 
-            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { displayAll, toolStripSeparator10, enablePreview, enableModelPreview, modelsOnly, toolStripSeparator11, displayInfo, enableResolveDependencies, allowDuplicates, skipContainer, toolStripSeparator12, toolStripMenuItem14, specifyUnityCNKey, toolStripSeparator13, toolStripMenuItem18, themeMenuItem, helpTooltipsMenuItem, showExpOpt });
+            optionsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { displayAll, toolStripSeparator10, enablePreview, enableModelPreview, modelsOnly, toolStripSeparator11, displayInfo, enableResolveDependencies, allowDuplicates, skipContainer, toolStripSeparator12, toolStripMenuItem14, toolStripSeparator13, toolStripMenuItem18, themeMenuItem, helpTooltipsMenuItem, showExpOpt });
             optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
             optionsToolStripMenuItem.Size = new System.Drawing.Size(61, 20);
             optionsToolStripMenuItem.Text = "Options";
@@ -379,14 +378,7 @@ namespace AssetStudio.GUI
             specifyUnityVersion.Font = new System.Drawing.Font("Microsoft YaHei UI", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             specifyUnityVersion.Name = "specifyUnityVersion";
             specifyUnityVersion.Size = new System.Drawing.Size(100, 23);
-            // 
-            // specifyUnityCNKey
-            // 
-            specifyUnityCNKey.Name = "specifyUnityCNKey";
-            specifyUnityCNKey.Size = new System.Drawing.Size(225, 22);
-            specifyUnityCNKey.Text = "Specify UnityCN Key";
-            specifyUnityCNKey.Click += specifyUnityCNKey_Click;
-            // 
+            //
             // toolStripSeparator13
             // 
             toolStripSeparator13.Name = "toolStripSeparator13";
@@ -1551,7 +1543,6 @@ namespace AssetStudio.GUI
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator10;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator11;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator12;
-        private System.Windows.Forms.ToolStripMenuItem specifyUnityCNKey;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator13;
         private System.Windows.Forms.ToolStripMenuItem enableFileLogging;
         private System.Windows.Forms.ToolStripMenuItem loggedEventsMenuItem;
