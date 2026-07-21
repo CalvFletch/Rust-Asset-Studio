@@ -44,6 +44,7 @@ namespace AssetStudio.CLI.Properties {
         public bool exportAllNodes => AppSettings.Get("exportAllNodes", true);
         public bool exportSkins => AppSettings.Get("exportSkins", true);
         public bool collectAnimations => AppSettings.Get("collectAnimations", true);
+        public bool exportLod0Only => AppSettings.Get("exportLod0Only", true);
         public bool exportAnimations => AppSettings.Get("exportAnimations", true);
         public decimal boneSize => AppSettings.Get("boneSize", (decimal)10);
         public int fbxVersion => AppSettings.Get("fbxVersion", 3);

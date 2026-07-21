@@ -1,4 +1,4 @@
-﻿
+
 using Newtonsoft.Json;
 using OpenTK.Graphics.OpenGL;
 using System;
@@ -178,6 +178,7 @@ namespace AssetStudio.GUI
 
             helpToolTip.SetToolTip(sceneTreeView, "Scene Hierarchy: every GameObject from the loaded bundles.\nTick checkboxes here, then use the Model menu to export the ticked objects as FBX.");
             helpToolTip.SetToolTip(treeSearch, "Type to search GameObjects, then press Enter to jump between matches.\nHold Ctrl+Enter to also tick the current match, Shift+Enter to tick every match.");
+            helpToolTip.SetToolTip(treePrefabsOnly, "When on, search matches whole models (prefab roots) only - \"ak47\" finds the gun,\nnot every bone and mesh inside it. Turn off to search inner parts too.");
             helpToolTip.SetToolTip(assetListView, "Asset List: every asset in the loaded bundles (meshes, textures, MonoBehaviours...).\nClick a row to preview it on the right. Select rows and use the Export menu to save them.\nClick a column header to sort; right-click a row for quick actions.");
             helpToolTip.SetToolTip(listSearch, "Filter the Asset List by name. Press Enter to apply.");
             helpToolTip.SetToolTip(classesListView, "Asset Classes: every Unity type found, grouped by Unity version.\nSelect one to see its full structure on the right.");
@@ -196,18 +197,20 @@ namespace AssetStudio.GUI
             SetHelperText(resetToolStripMenuItem, "Unload everything and clear the UI.");
             SetHelperText(optionsToolStripMenuItem, "Loading, preview, theme and export settings, plus the game profile.");
             SetHelperText(toolStripMenuItem18, "Which game's bundle format to expect. Keep this on Rust for Rust files.");
-            SetHelperText(modelToolStripMenuItem, "Export the GameObjects you ticked in the Scene Hierarchy as FBX models.\nSplit = one file per object; merge = a single combined file.");
-            SetHelperText(exportToolStripMenuItem, "Export assets selected in the Asset List: converted files (png, fbx, wav...),\nraw bytes, readable dumps, or JSON.");
+            SetHelperText(modelToolStripMenuItem, "Export the models you ticked in the Scene Hierarchy as FBX.\nOne FBX per model; only the highest-detail (LOD0) meshes are included by default.");
+            SetHelperText(modelAdvancedMenuItem, "Less common model exports: merge everything you ticked into a single FBX,\nor produce one merged FBX per bundle file node.");
+            SetHelperText(exportToolStripMenuItem, "Export assets selected in the Asset List as converted files (png, fbx, wav...).\nRaw bytes, readable dumps and JSON live under Advanced.");
+            SetHelperText(exportAdvancedMenuItem, "Raw bytes, readable dumps, JSON, asset lists and a scene hierarchy dump.");
             SetHelperText(filterTypeToolStripMenuItem, "Show only certain asset types in the Asset List.");
             SetHelperText(debugMenuItem, "Logging and diagnostic tools.");
-            SetHelperText(miscToolStripMenuItem, "Advanced indexing tools. Index Rust's Bundles folder once, then find assets\nand resolve cross-bundle references without loading all 40+ GB.");
-            SetHelperText(showExpOpt, "Detailed export settings: output formats, texture type, FBX scale and more.");
-            SetHelperText(buildMapToolStripMenuItem, "Scan a folder (e.g. Rust's Bundles) and build a CABMap: an index of which bundle\ncontains each internal file. With a CABMap loaded, a single bundle can automatically\npull its materials and textures from other bundles.");
-            SetHelperText(buildBothToolStripMenuItem, "Build the CABMap and the AssetMap in one pass.");
-            SetHelperText(clearMapToolStripMenuItem, "Delete previously built maps.");
-            SetHelperText(buildAssetMapToolStripMenuItem, "Scan a folder and export a searchable list of every asset and which bundle holds it,\nwithout keeping anything loaded. Open the result with the Asset Browser.");
-            SetHelperText(loadCABMapToolStripMenuItem, "Load a previously built CABMap so cross-bundle references resolve when loading bundles.");
-            SetHelperText(assetBrowserToolStripMenuItem, "Search a built AssetMap and load only the bundles containing the assets you pick -\nthe fast way to find one item in Rust's 40+ GB of bundles.");
+            SetHelperText(miscToolStripMenuItem, "Index Rust's Bundles folder once, then search assets and resolve cross-bundle\ntextures without loading all 40+ GB.");
+            SetHelperText(showExpOpt, "Detailed export settings: output formats, texture type, FBX scale, LOD handling and more.");
+            SetHelperText(buildMapToolStripMenuItem, "Scan a folder (e.g. Rust's Bundles) and record which bundle contains each internal\nfile (also called a CABMap). With a link index loaded, a single bundle automatically\npulls its materials and textures from other bundles.");
+            SetHelperText(buildBothToolStripMenuItem, "Build the link index and the search index in one pass.");
+            SetHelperText(clearMapToolStripMenuItem, "Delete previously built indexes.");
+            SetHelperText(buildAssetMapToolStripMenuItem, "Scan a folder and write a searchable list of every asset and which bundle holds it\n(also called an AssetMap), without keeping anything loaded.\nOpen the result with the Asset Browser.");
+            SetHelperText(loadCABMapToolStripMenuItem, "Load a previously built link index so cross-bundle references resolve when loading bundles.");
+            SetHelperText(assetBrowserToolStripMenuItem, "Search a built search index and load only the bundles containing the assets you pick -\nthe fast way to find one item in Rust's 40+ GB of bundles.");
         }
 
         private static void SetHelperText(ToolStripMenuItem item, string text)
@@ -826,6 +829,12 @@ namespace AssetStudio.GUI
             nextGObject = 0;
         }
 
+        private void treePrefabsOnly_CheckedChanged(object sender, EventArgs e)
+        {
+            treeSrcResults.Clear();
+            nextGObject = 0;
+        }
+
         private void treeSearch_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter && !string.IsNullOrEmpty(treeSearch.Text))
@@ -885,9 +894,18 @@ namespace AssetStudio.GUI
 
         private void TreeNodeSearch(Regex regex, TreeNode treeNode)
         {
-            if (regex.IsMatch(treeNode.Text))
+            // "Whole models only" matches the top GameObject of each prefab and skips
+            // its inner transforms/meshes, so a search like "ak47" lands on the model
+            // itself instead of dozens of nested parts.
+            var isModelRoot = treeNode is GameObjectTreeNode && treeNode.Parent is not GameObjectTreeNode;
+            if (regex.IsMatch(treeNode.Text) && (!treePrefabsOnly.Checked || isModelRoot))
             {
                 treeSrcResults.Add(treeNode);
+            }
+
+            if (treePrefabsOnly.Checked && isModelRoot)
+            {
+                return;
             }
 
             foreach (TreeNode node in treeNode.Nodes)
@@ -1551,6 +1569,7 @@ namespace AssetStudio.GUI
                 imageFormat = Properties.Settings.Default.convertType,
                 game = Studio.Game,
                 collectAnimations = Properties.Settings.Default.collectAnimations,
+                lod0Only = Properties.Settings.Default.exportLod0Only,
                 uvs = JsonConvert.DeserializeObject<Dictionary<string, (bool, int)>>(Properties.Settings.Default.uvs),
                 texs = JsonConvert.DeserializeObject<Dictionary<int, string>>(Properties.Settings.Default.texs),
             };
@@ -1564,6 +1583,7 @@ namespace AssetStudio.GUI
                 imageFormat = Properties.Settings.Default.convertType,
                 game = Studio.Game,
                 collectAnimations = Properties.Settings.Default.collectAnimations,
+                lod0Only = Properties.Settings.Default.exportLod0Only,
                 uvs = JsonConvert.DeserializeObject<Dictionary<string, (bool, int)>>(Properties.Settings.Default.uvs),
                 texs = JsonConvert.DeserializeObject<Dictionary<int, string>>(Properties.Settings.Default.texs),
             };

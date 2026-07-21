@@ -53,6 +53,7 @@ namespace AssetStudio.GUI
             label7 = new Label();
             openAfterExport = new CheckBox();
             restoreExtensionName = new CheckBox();
+            lod0Only = new CheckBox();
             convertAudio = new CheckBox();
             panel1 = new Panel();
             totga = new RadioButton();
@@ -129,6 +130,7 @@ namespace AssetStudio.GUI
             groupBox1.Controls.Add(label7);
             groupBox1.Controls.Add(openAfterExport);
             groupBox1.Controls.Add(restoreExtensionName);
+            groupBox1.Controls.Add(lod0Only);
             groupBox1.Controls.Add(convertAudio);
             groupBox1.Controls.Add(panel1);
             groupBox1.Controls.Add(converttexture);
@@ -312,6 +314,19 @@ namespace AssetStudio.GUI
             restoreExtensionName.TabIndex = 9;
             restoreExtensionName.Text = "Restore TextAsset extension name";
             restoreExtensionName.UseVisualStyleBackColor = true;
+            //
+            // lod0Only
+            //
+            lod0Only.AutoSize = true;
+            lod0Only.Checked = true;
+            lod0Only.CheckState = CheckState.Checked;
+            lod0Only.Location = new System.Drawing.Point(7, 104);
+            lod0Only.Margin = new Padding(4);
+            lod0Only.Name = "lod0Only";
+            lod0Only.Size = new System.Drawing.Size(220, 19);
+            lod0Only.TabIndex = 8;
+            lod0Only.Text = "Highest detail only (skip LOD1+ meshes)";
+            lod0Only.UseVisualStyleBackColor = true;
             //
             // convertAudio
             // 
@@ -683,6 +698,7 @@ namespace AssetStudio.GUI
         private System.Windows.Forms.CheckBox exportAnimations;
         private System.Windows.Forms.ComboBox assetGroupOptions;
         private System.Windows.Forms.CheckBox restoreExtensionName;
+        private System.Windows.Forms.CheckBox lod0Only;
         private System.Windows.Forms.CheckBox openAfterExport;
         private System.Windows.Forms.ToolTip exportUvsTooltip;
         private System.Windows.Forms.CheckBox collectAnimations;

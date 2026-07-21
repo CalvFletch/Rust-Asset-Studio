@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace AssetStudio
 {
@@ -180,11 +181,63 @@ namespace AssetStudio
                 }
             }
 
+            var children = new List<Transform>();
             foreach (var pptr in m_Transform.m_Children)
             {
                 if (pptr.TryGet(out var child))
+                    children.Add(child);
+            }
+            var lodDuplicates = options.lod0Only ? CollectLodDuplicates(children) : null;
+            foreach (var child in children)
+            {
+                if (lodDuplicates == null || !lodDuplicates.Contains(child))
                     ConvertMeshRenderer(child);
             }
+        }
+
+        private static readonly Regex LodNameRegex = new Regex(@"^(.*?)LOD(\d+)", RegexOptions.Compiled);
+
+        // Rust names LOD variants "xxx_LOD0".."LOD3" (or bare "LOD0 7" siblings). A group of
+        // siblings sharing a prefix only counts as a LOD set when a level-0 member exists, so
+        // unrelated names that merely contain "LOD<n>" are never dropped. Members with level >= 1
+        // are skipped at export - Blender users only ever want the highest-detail mesh.
+        private static HashSet<Transform> CollectLodDuplicates(List<Transform> children)
+        {
+            HashSet<Transform> duplicates = null;
+            Dictionary<string, List<(Transform child, int level)>> groups = null;
+            foreach (var child in children)
+            {
+                if (!child.m_GameObject.TryGet(out var go) || string.IsNullOrEmpty(go.m_Name))
+                    continue;
+                var match = LodNameRegex.Match(go.m_Name);
+                if (!match.Success)
+                    continue;
+                var prefix = match.Groups[1].Value;
+                var level = int.Parse(match.Groups[2].Value);
+                groups ??= new Dictionary<string, List<(Transform, int)>>();
+                if (!groups.TryGetValue(prefix, out var members))
+                {
+                    members = new List<(Transform, int)>();
+                    groups.Add(prefix, members);
+                }
+                members.Add((child, level));
+            }
+            if (groups == null)
+                return null;
+            foreach (var members in groups.Values)
+            {
+                if (members.Count < 2 || !members.Any(x => x.level == 0))
+                    continue;
+                foreach (var (child, level) in members)
+                {
+                    if (level >= 1)
+                    {
+                        duplicates ??= new HashSet<Transform>();
+                        duplicates.Add(child);
+                    }
+                }
+            }
+            return duplicates;
         }
 
         private void CollectAnimationClip(Animator m_Animator)
@@ -1137,8 +1190,9 @@ namespace AssetStudio
             public ImageFormat imageFormat;
             public Game game;
             public bool collectAnimations;
+            public bool lod0Only;
             public Dictionary<string, (bool, int)> uvs;
-            public Dictionary<int, string> texs; 
+            public Dictionary<int, string> texs;
         }
     }
 }

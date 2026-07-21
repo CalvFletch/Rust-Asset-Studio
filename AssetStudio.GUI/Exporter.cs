@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
 using System.IO;
@@ -324,6 +324,7 @@ namespace AssetStudio.GUI
                 imageFormat = Properties.Settings.Default.convertType,
                 game = Studio.Game,
                 collectAnimations = Properties.Settings.Default.collectAnimations,
+                lod0Only = Properties.Settings.Default.exportLod0Only,
                 uvs = JsonConvert.DeserializeObject<Dictionary<string, (bool, int)>>(Properties.Settings.Default.uvs),
                 texs = JsonConvert.DeserializeObject<Dictionary<int, string>>(Properties.Settings.Default.texs),
             };
@@ -350,6 +351,7 @@ namespace AssetStudio.GUI
                 imageFormat = Properties.Settings.Default.convertType,
                 game = Studio.Game,
                 collectAnimations = Properties.Settings.Default.collectAnimations,
+                lod0Only = Properties.Settings.Default.exportLod0Only,
                 uvs = JsonConvert.DeserializeObject<Dictionary<string, (bool, int)>>(Properties.Settings.Default.uvs),
                 texs = JsonConvert.DeserializeObject<Dictionary<int, string>>(Properties.Settings.Default.texs),
             };
@@ -375,6 +377,7 @@ namespace AssetStudio.GUI
                 imageFormat = Properties.Settings.Default.convertType,
                 game = Studio.Game,
                 collectAnimations = Properties.Settings.Default.collectAnimations,
+                lod0Only = Properties.Settings.Default.exportLod0Only,
                 uvs = JsonConvert.DeserializeObject<Dictionary<string, (bool, int)>>(Properties.Settings.Default.uvs),
                 texs = JsonConvert.DeserializeObject<Dictionary<int, string>>(Properties.Settings.Default.texs),
             };

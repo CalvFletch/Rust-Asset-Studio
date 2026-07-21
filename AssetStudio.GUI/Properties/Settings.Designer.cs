@@ -358,7 +358,19 @@ namespace AssetStudio.GUI.Properties {
                 this["collectAnimations"] = value;
             }
         }
-        
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool exportLod0Only {
+            get {
+                return ((bool)(this["exportLod0Only"]));
+            }
+            set {
+                this["exportLod0Only"] = value;
+            }
+        }
+
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]

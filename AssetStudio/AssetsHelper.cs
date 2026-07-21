@@ -128,7 +128,7 @@ namespace AssetStudio
         {
             if (CABMap.Count == 0)
             {
-                Logger.Warning("CABMap is not build, skip resolving dependencies...");
+                Logger.Warning("No link index (CABMap) loaded - assets stored in other bundles (e.g. textures) may not resolve. Build one via Indexing > Build Link Index.");
             }
             else
             {

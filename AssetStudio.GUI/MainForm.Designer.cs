@@ -67,6 +67,8 @@ namespace AssetStudio.GUI
             themeDarkMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             helpTooltipsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             modelToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            modelAdvancedMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            exportAdvancedMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             exportAllObjectssplitToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             exportSelectedObjectsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             exportSelectedObjectsWithAnimationClipToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -127,6 +129,7 @@ namespace AssetStudio.GUI
             tabPage1 = new System.Windows.Forms.TabPage();
             sceneTreeView = new GOHierarchy();
             treeSearch = new System.Windows.Forms.TextBox();
+            treePrefabsOnly = new System.Windows.Forms.CheckBox();
             tabPage2 = new System.Windows.Forms.TabPage();
             assetListView = new System.Windows.Forms.ListView();
             columnHeaderName = new System.Windows.Forms.ColumnHeader();
@@ -449,30 +452,37 @@ namespace AssetStudio.GUI
             // 
             // modelToolStripMenuItem
             // 
-            modelToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportAllObjectssplitToolStripMenuItem1, exportSelectedObjectsToolStripMenuItem, exportSelectedObjectsWithAnimationClipToolStripMenuItem, toolStripSeparator1, exportSelectedObjectsmergeToolStripMenuItem, exportSelectedObjectsmergeWithAnimationClipToolStripMenuItem, toolStripSeparator9, exportSelectedNodessplitToolStripMenuItem, exportSelectedNodessplitSelectedAnimationClipsToolStripMenuItem });
+            modelToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportSelectedObjectsToolStripMenuItem, exportSelectedObjectsWithAnimationClipToolStripMenuItem, toolStripSeparator1, exportAllObjectssplitToolStripMenuItem1, modelAdvancedMenuItem });
             modelToolStripMenuItem.Name = "modelToolStripMenuItem";
             modelToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
             modelToolStripMenuItem.Text = "Model";
-            // 
+            //
+            // modelAdvancedMenuItem
+            //
+            modelAdvancedMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportSelectedObjectsmergeToolStripMenuItem, exportSelectedObjectsmergeWithAnimationClipToolStripMenuItem, toolStripSeparator9, exportSelectedNodessplitToolStripMenuItem, exportSelectedNodessplitSelectedAnimationClipsToolStripMenuItem });
+            modelAdvancedMenuItem.Name = "modelAdvancedMenuItem";
+            modelAdvancedMenuItem.Size = new System.Drawing.Size(382, 22);
+            modelAdvancedMenuItem.Text = "Advanced";
+            //
             // exportAllObjectssplitToolStripMenuItem1
             // 
             exportAllObjectssplitToolStripMenuItem1.Name = "exportAllObjectssplitToolStripMenuItem1";
             exportAllObjectssplitToolStripMenuItem1.Size = new System.Drawing.Size(382, 22);
-            exportAllObjectssplitToolStripMenuItem1.Text = "Export all objects (split)";
+            exportAllObjectssplitToolStripMenuItem1.Text = "Export all models (one FBX per model)";
             exportAllObjectssplitToolStripMenuItem1.Click += exportAllObjectssplitToolStripMenuItem1_Click;
             // 
             // exportSelectedObjectsToolStripMenuItem
             // 
             exportSelectedObjectsToolStripMenuItem.Name = "exportSelectedObjectsToolStripMenuItem";
             exportSelectedObjectsToolStripMenuItem.Size = new System.Drawing.Size(382, 22);
-            exportSelectedObjectsToolStripMenuItem.Text = "Export selected objects (split)";
+            exportSelectedObjectsToolStripMenuItem.Text = "Export checked models (one FBX per model)";
             exportSelectedObjectsToolStripMenuItem.Click += exportSelectedObjectsToolStripMenuItem_Click;
             // 
             // exportSelectedObjectsWithAnimationClipToolStripMenuItem
             // 
             exportSelectedObjectsWithAnimationClipToolStripMenuItem.Name = "exportSelectedObjectsWithAnimationClipToolStripMenuItem";
             exportSelectedObjectsWithAnimationClipToolStripMenuItem.Size = new System.Drawing.Size(382, 22);
-            exportSelectedObjectsWithAnimationClipToolStripMenuItem.Text = "Export selected objects (split) + selected AnimationClips";
+            exportSelectedObjectsWithAnimationClipToolStripMenuItem.Text = "Export checked models + selected animations";
             exportSelectedObjectsWithAnimationClipToolStripMenuItem.Click += exportObjectswithAnimationClipMenuItem_Click;
             // 
             // toolStripSeparator1
@@ -484,14 +494,14 @@ namespace AssetStudio.GUI
             // 
             exportSelectedObjectsmergeToolStripMenuItem.Name = "exportSelectedObjectsmergeToolStripMenuItem";
             exportSelectedObjectsmergeToolStripMenuItem.Size = new System.Drawing.Size(382, 22);
-            exportSelectedObjectsmergeToolStripMenuItem.Text = "Export selected objects (merge)";
+            exportSelectedObjectsmergeToolStripMenuItem.Text = "Merge checked models into one FBX";
             exportSelectedObjectsmergeToolStripMenuItem.Click += exportSelectedObjectsmergeToolStripMenuItem_Click;
             // 
             // exportSelectedObjectsmergeWithAnimationClipToolStripMenuItem
             // 
             exportSelectedObjectsmergeWithAnimationClipToolStripMenuItem.Name = "exportSelectedObjectsmergeWithAnimationClipToolStripMenuItem";
             exportSelectedObjectsmergeWithAnimationClipToolStripMenuItem.Size = new System.Drawing.Size(382, 22);
-            exportSelectedObjectsmergeWithAnimationClipToolStripMenuItem.Text = "Export selected objects (merge) + selected AnimationClips";
+            exportSelectedObjectsmergeWithAnimationClipToolStripMenuItem.Text = "Merge checked models into one FBX + selected animations";
             exportSelectedObjectsmergeWithAnimationClipToolStripMenuItem.Click += exportSelectedObjectsmergeWithAnimationClipToolStripMenuItem_Click;
             // 
             // toolStripSeparator9
@@ -503,23 +513,30 @@ namespace AssetStudio.GUI
             // 
             exportSelectedNodessplitToolStripMenuItem.Name = "exportSelectedNodessplitToolStripMenuItem";
             exportSelectedNodessplitToolStripMenuItem.Size = new System.Drawing.Size(382, 22);
-            exportSelectedNodessplitToolStripMenuItem.Text = "Export selected nodes (split)";
+            exportSelectedNodessplitToolStripMenuItem.Text = "One FBX per checked file node (merged)";
             exportSelectedNodessplitToolStripMenuItem.Click += exportSelectedNodessplitToolStripMenuItem_Click;
             // 
             // exportSelectedNodessplitSelectedAnimationClipsToolStripMenuItem
             // 
             exportSelectedNodessplitSelectedAnimationClipsToolStripMenuItem.Name = "exportSelectedNodessplitSelectedAnimationClipsToolStripMenuItem";
             exportSelectedNodessplitSelectedAnimationClipsToolStripMenuItem.Size = new System.Drawing.Size(382, 22);
-            exportSelectedNodessplitSelectedAnimationClipsToolStripMenuItem.Text = "Export selected nodes (split) + selected AnimationClips";
+            exportSelectedNodessplitSelectedAnimationClipsToolStripMenuItem.Text = "One FBX per checked file node + selected animations";
             exportSelectedNodessplitSelectedAnimationClipsToolStripMenuItem.Click += exportSelectedNodessplitSelectedAnimationClipsToolStripMenuItem_Click;
             // 
             // exportToolStripMenuItem
             // 
-            exportToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportAllAssetsMenuItem, exportSelectedAssetsMenuItem, exportFilteredAssetsMenuItem, toolStripSeparator3, exportAnimatorWithSelectedAnimationClipToolStripMenuItem, toolStripSeparator4, toolStripMenuItem2, toolStripMenuItem3, toolStripMenuItem16, toolStripSeparator2, toolStripMenuItem10, sceneHierarchy });
+            exportToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportSelectedAssetsMenuItem, exportFilteredAssetsMenuItem, exportAllAssetsMenuItem, toolStripSeparator3, exportAdvancedMenuItem });
             exportToolStripMenuItem.Name = "exportToolStripMenuItem";
             exportToolStripMenuItem.Size = new System.Drawing.Size(53, 20);
             exportToolStripMenuItem.Text = "Export";
-            // 
+            //
+            // exportAdvancedMenuItem
+            //
+            exportAdvancedMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportAnimatorWithSelectedAnimationClipToolStripMenuItem, toolStripSeparator4, toolStripMenuItem2, toolStripMenuItem3, toolStripMenuItem16, toolStripMenuItem10, toolStripSeparator2, sceneHierarchy });
+            exportAdvancedMenuItem.Name = "exportAdvancedMenuItem";
+            exportAdvancedMenuItem.Size = new System.Drawing.Size(255, 22);
+            exportAdvancedMenuItem.Text = "Advanced";
+            //
             // exportAllAssetsMenuItem
             // 
             exportAllAssetsMenuItem.Name = "exportAllAssetsMenuItem";
@@ -763,34 +780,34 @@ namespace AssetStudio.GUI
             miscToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { MapNameComboBox, buildMapToolStripMenuItem, buildBothToolStripMenuItem, clearMapToolStripMenuItem, toolStripSeparator7, assetMapNameTextBox, buildAssetMapToolStripMenuItem, assetMapTypeMenuItem, toolStripSeparator8, loadCABMapToolStripMenuItem, assetBrowserToolStripMenuItem });
             miscToolStripMenuItem.Name = "miscToolStripMenuItem";
             miscToolStripMenuItem.Size = new System.Drawing.Size(47, 20);
-            miscToolStripMenuItem.Text = "Misc.";
+            miscToolStripMenuItem.Text = "Indexing";
             miscToolStripMenuItem.DropDownOpening += miscToolStripMenuItem_DropDownOpening;
             // 
             // MapNameComboBox
             // 
             MapNameComboBox.Name = "MapNameComboBox";
             MapNameComboBox.Size = new System.Drawing.Size(121, 23);
-            MapNameComboBox.ToolTipText = "Enter name of Map here";
+            MapNameComboBox.ToolTipText = "Name for the link index (pick anything, e.g. Rust)";
             // 
             // buildMapToolStripMenuItem
             // 
             buildMapToolStripMenuItem.Name = "buildMapToolStripMenuItem";
             buildMapToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
-            buildMapToolStripMenuItem.Text = "Build Map";
+            buildMapToolStripMenuItem.Text = "Build Link Index";
             buildMapToolStripMenuItem.Click += buildMapToolStripMenuItem_Click;
             // 
             // buildBothToolStripMenuItem
             // 
             buildBothToolStripMenuItem.Name = "buildBothToolStripMenuItem";
             buildBothToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
-            buildBothToolStripMenuItem.Text = "Build Both";
+            buildBothToolStripMenuItem.Text = "Build Both Indexes";
             buildBothToolStripMenuItem.Click += buildBothToolStripMenuItem_Click;
             // 
             // clearMapToolStripMenuItem
             // 
             clearMapToolStripMenuItem.Name = "clearMapToolStripMenuItem";
             clearMapToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
-            clearMapToolStripMenuItem.Text = "Clear Map";
+            clearMapToolStripMenuItem.Text = "Delete Indexes";
             clearMapToolStripMenuItem.Click += clearMapToolStripMenuItem_Click;
             // 
             // toolStripSeparator7
@@ -802,20 +819,20 @@ namespace AssetStudio.GUI
             // 
             assetMapNameTextBox.Name = "assetMapNameTextBox";
             assetMapNameTextBox.Size = new System.Drawing.Size(100, 23);
-            assetMapNameTextBox.ToolTipText = "Enter name of AssetMap here";
+            assetMapNameTextBox.ToolTipText = "File name for the search index";
             // 
             // buildAssetMapToolStripMenuItem
             // 
             buildAssetMapToolStripMenuItem.Name = "buildAssetMapToolStripMenuItem";
             buildAssetMapToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
-            buildAssetMapToolStripMenuItem.Text = "Build AssetMap";
+            buildAssetMapToolStripMenuItem.Text = "Build Search Index";
             buildAssetMapToolStripMenuItem.Click += buildAssetMapToolStripMenuItem_Click;
             // 
             // assetMapTypeMenuItem
             // 
             assetMapTypeMenuItem.Name = "assetMapTypeMenuItem";
             assetMapTypeMenuItem.Size = new System.Drawing.Size(181, 22);
-            assetMapTypeMenuItem.Text = "AssetMap Type";
+            assetMapTypeMenuItem.Text = "Search Index Format";
             assetMapTypeMenuItem.DropDownItemClicked += assetMapTypeMenuItem_DropDownItemClicked;
             // 
             // toolStripSeparator8
@@ -827,7 +844,7 @@ namespace AssetStudio.GUI
             // 
             loadCABMapToolStripMenuItem.Name = "loadCABMapToolStripMenuItem";
             loadCABMapToolStripMenuItem.Size = new System.Drawing.Size(181, 22);
-            loadCABMapToolStripMenuItem.Text = "Load CABMap";
+            loadCABMapToolStripMenuItem.Text = "Load Link Index";
             loadCABMapToolStripMenuItem.Click += loadCABMapToolStripMenuItem_Click;
             // 
             // assetBrowserToolStripMenuItem
@@ -878,6 +895,7 @@ namespace AssetStudio.GUI
             // tabPage1
             // 
             tabPage1.Controls.Add(sceneTreeView);
+            tabPage1.Controls.Add(treePrefabsOnly);
             tabPage1.Controls.Add(treeSearch);
             tabPage1.Location = new System.Drawing.Point(4, 24);
             tabPage1.Name = "tabPage1";
@@ -908,7 +926,21 @@ namespace AssetStudio.GUI
             treeSearch.TabIndex = 0;
             treeSearch.TextChanged += treeSearch_TextChanged;
             treeSearch.KeyDown += treeSearch_KeyDown;
-            // 
+            //
+            // treePrefabsOnly
+            //
+            treePrefabsOnly.Checked = true;
+            treePrefabsOnly.CheckState = System.Windows.Forms.CheckState.Checked;
+            treePrefabsOnly.Dock = System.Windows.Forms.DockStyle.Top;
+            treePrefabsOnly.Location = new System.Drawing.Point(0, 23);
+            treePrefabsOnly.Name = "treePrefabsOnly";
+            treePrefabsOnly.Padding = new System.Windows.Forms.Padding(3, 0, 0, 0);
+            treePrefabsOnly.Size = new System.Drawing.Size(472, 21);
+            treePrefabsOnly.TabIndex = 2;
+            treePrefabsOnly.Text = "Search whole models only (skip their inner parts)";
+            treePrefabsOnly.UseVisualStyleBackColor = true;
+            treePrefabsOnly.CheckedChanged += treePrefabsOnly_CheckedChanged;
+            //
             // tabPage2
             // 
             tabPage2.Controls.Add(assetListView);
@@ -1417,6 +1449,7 @@ namespace AssetStudio.GUI
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.TextBox treeSearch;
+        private System.Windows.Forms.CheckBox treePrefabsOnly;
         private System.Windows.Forms.TextBox listSearch;
         private System.Windows.Forms.ToolStripMenuItem loadFileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem loadFolderToolStripMenuItem;
@@ -1513,6 +1546,8 @@ namespace AssetStudio.GUI
         private System.Windows.Forms.ToolStripTextBox specifyUnityVersion;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem15;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem18;
+        private System.Windows.Forms.ToolStripMenuItem modelAdvancedMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportAdvancedMenuItem;
         private System.Windows.Forms.ToolStripComboBox specifyGame;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem16;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem17;

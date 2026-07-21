@@ -41,6 +41,7 @@ namespace AssetStudio.GUI
             fbxVersion.SelectedIndex = Properties.Settings.Default.fbxVersion;
             fbxFormat.SelectedIndex = Properties.Settings.Default.fbxFormat;
             collectAnimations.Checked = Properties.Settings.Default.collectAnimations;
+            lod0Only.Checked = Properties.Settings.Default.exportLod0Only;
             minimalAssetMap.Checked = Properties.Settings.Default.minimalAssetMap;
             types = JsonConvert.DeserializeObject<Dictionary<ClassIDType, (bool, bool)>>(Properties.Settings.Default.types);
             uvs = JsonConvert.DeserializeObject<Dictionary<string, (bool, int)>>(Properties.Settings.Default.uvs);
@@ -77,6 +78,7 @@ namespace AssetStudio.GUI
             Properties.Settings.Default.fbxVersion = fbxVersion.SelectedIndex;
             Properties.Settings.Default.fbxFormat = fbxFormat.SelectedIndex;
             Properties.Settings.Default.collectAnimations = collectAnimations.Checked;
+            Properties.Settings.Default.exportLod0Only = lod0Only.Checked;
             Properties.Settings.Default.minimalAssetMap = minimalAssetMap.Checked;
             Properties.Settings.Default.types = JsonConvert.SerializeObject(types);
             Properties.Settings.Default.uvs = JsonConvert.SerializeObject(uvs);
