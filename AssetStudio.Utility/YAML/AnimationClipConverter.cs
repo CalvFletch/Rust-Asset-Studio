@@ -57,20 +57,8 @@ namespace AssetStudio
             var lastSampleFrame = streamedFrames.Count > 1 ? streamedFrames[streamedFrames.Count - 2].time : 0.0f;
             var lastFrame = Math.Max(lastDenseFrame, lastSampleFrame);
 
-            if (m_Clip.m_ACLClip.IsSet && !game.Type.IsSRGroup())
-            {
-                var lastACLFrame = ProcessACLClip(m_Clip, bindings, tos);
-                lastFrame = Math.Max(lastFrame, lastACLFrame);
-                animationClip.m_Compressed = false;
-            }
             ProcessStreams(streamedFrames, bindings, tos, m_Clip.m_DenseClip.m_SampleRate);
             ProcessDenses(m_Clip, bindings, tos);
-            if (m_Clip.m_ACLClip.IsSet && game.Type.IsSRGroup())
-            {
-                var lastACLFrame = ProcessACLClip(m_Clip, bindings, tos);
-                lastFrame = Math.Max(lastFrame, lastACLFrame);
-                animationClip.m_Compressed = false;
-            }
             if (m_Clip.m_ConstantClip != null)
             {
                 ProcessConstant(m_Clip, bindings, tos, lastFrame);
@@ -111,8 +99,6 @@ namespace AssetStudio
                 {
                     var curve = frame.keyList[curveIndex];
                     var index = curve.index;
-                    if (!game.Type.IsSRGroup())
-                        index += (int)animationClip.m_MuscleClip.m_Clip.m_ACLClip.CurveCount;
                     var binding = bindings.FindBinding(index);
 
                     var path = GetCurvePath(tos, binding.path);
@@ -160,8 +146,6 @@ namespace AssetStudio
                 for (var curveIndex = 0; curveIndex < dense.m_CurveCount;)
                 {
                     var index = (int)streamCount + curveIndex;
-                    if (!game.Type.IsSRGroup())
-                        index += (int)clip.m_ACLClip.CurveCount;
                     var binding = bindings.FindBinding(index);
                     var path = GetCurvePath(tos, binding.path);
                     var framePosition = frameOffset + curveIndex;
@@ -183,45 +167,6 @@ namespace AssetStudio
                 }
             }
         }
-        private float ProcessACLClip(Clip clip, AnimationClipBindingConstant bindings, Dictionary<uint, string> tos)
-        {
-            var acl = clip.m_ACLClip;
-            acl.Process(game, out var values, out var times);
-            float[] slopeValues = new float[4]; // no slopes - 0 values
-
-            int frameCount = times.Length;
-            for (int frameIndex = 0; frameIndex < frameCount; frameIndex++)
-            {
-                float time = times[frameIndex];
-                int frameOffset = frameIndex * (int)acl.CurveCount;
-                for (int curveIndex = 0; curveIndex < acl.CurveCount;)
-                {
-                    var index = curveIndex;
-                    if (game.Type.IsSRGroup())
-                        index += (int)(clip.m_DenseClip.m_CurveCount + clip.m_StreamedClip.curveCount);
-                    GenericBinding binding = bindings.FindBinding(index);
-                    string path = GetCurvePath(tos, binding.path);
-                    int framePosition = frameOffset + curveIndex;
-                    if (binding.typeID == ClassIDType.Transform)
-                    {
-                        AddTransformCurve(time, binding.attribute, values, slopeValues, slopeValues, framePosition, path);
-                        curveIndex += binding.GetDimension();
-                    }
-                    else if ((BindingCustomType)binding.customType == BindingCustomType.None)
-                    {
-                        AddDefaultCurve(binding, path, time, values[framePosition]);
-                        curveIndex++;
-                    }
-                    else
-                    {
-                        AddCustomCurve(bindings, binding, path, time, values[framePosition]);
-                        curveIndex++;
-                    }
-                }
-            }
-
-            return times[frameCount - 1];
-        }
         private void ProcessConstant(Clip clip, AnimationClipBindingConstant bindings, Dictionary<uint, string> tos, float lastFrame)
         {
             var constant = clip.m_ConstantClip;
@@ -236,8 +181,6 @@ namespace AssetStudio
                 for (var curveIndex = 0; curveIndex < constant.data.Length;)
                 {
                     var index = (int)(streamCount + denseCount + curveIndex);
-                    if (clip.m_ACLClip.IsSet)
-                        index += (int)clip.m_ACLClip.CurveCount;
                     GenericBinding binding = bindings.FindBinding(index);
                     string path = GetCurvePath(tos, binding.path);
                     if (binding.typeID == ClassIDType.Transform)

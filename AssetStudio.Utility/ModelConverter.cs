@@ -900,23 +900,6 @@ namespace AssetStudio
                     var m_Clip = animationClip.m_MuscleClip.m_Clip;
                     var streamedFrames = m_Clip.m_StreamedClip.ReadData();
                     var m_ClipBindingConstant = animationClip.m_ClipBindingConstant ?? m_Clip.ConvertValueArrayToGenericBinding();
-                    var m_ACLClip = m_Clip.m_ACLClip;
-                    var aclCount = m_ACLClip.CurveCount;
-                    if (m_ACLClip.IsSet && !options.game.Type.IsSRGroup())
-                    {
-                        m_ACLClip.Process(options.game, out var values, out var times);
-                        for (int frameIndex = 0; frameIndex < times.Length; frameIndex++)
-                        {
-                            var time = times[frameIndex];
-                            var frameOffset = frameIndex * m_ACLClip.CurveCount;
-                            for (int curveIndex = 0; curveIndex < m_ACLClip.CurveCount;)
-                            {
-                                var index = curveIndex;
-                                ReadCurveData(iAnim, m_ClipBindingConstant, index, time, values, (int)frameOffset, ref curveIndex);
-                            }
-
-                        }
-                    }
                     for (int frameIndex = 1; frameIndex < streamedFrames.Count - 1; frameIndex++)
                     {
                         var frame = streamedFrames[frameIndex];
@@ -924,8 +907,6 @@ namespace AssetStudio
                         for (int curveIndex = 0; curveIndex < frame.keyList.Count;)
                         {
                             var index = frame.keyList[curveIndex].index;
-                            if (!options.game.Type.IsSRGroup())
-                                index += (int)aclCount;
                             ReadCurveData(iAnim, m_ClipBindingConstant, index, frame.time, streamedValues, 0, ref curveIndex);
                         }
                     }
@@ -938,24 +919,7 @@ namespace AssetStudio
                         for (int curveIndex = 0; curveIndex < m_DenseClip.m_CurveCount;)
                         {
                             var index = streamCount + curveIndex;
-                            if (!options.game.Type.IsSRGroup())
-                                index += (int)aclCount;
                             ReadCurveData(iAnim, m_ClipBindingConstant, (int)index, time, m_DenseClip.m_SampleArray, (int)frameOffset, ref curveIndex);
-                        }
-                    }
-                    if (m_ACLClip.IsSet && options.game.Type.IsSRGroup())
-                    {
-                        m_ACLClip.Process(options.game, out var values, out var times);
-                        for (int frameIndex = 0; frameIndex < times.Length; frameIndex++)
-                        {
-                            var time = times[frameIndex];
-                            var frameOffset = frameIndex * m_ACLClip.CurveCount;
-                            for (int curveIndex = 0; curveIndex < m_ACLClip.CurveCount;)
-                            {
-                                var index = (int)(curveIndex + m_DenseClip.m_CurveCount + streamCount);
-                                ReadCurveData(iAnim, m_ClipBindingConstant, index, time, values, (int)frameOffset, ref curveIndex);
-                            }
-
                         }
                     }
                     if (m_Clip.m_ConstantClip != null)
@@ -967,7 +931,7 @@ namespace AssetStudio
                         {
                             for (int curveIndex = 0; curveIndex < m_ConstantClip.data.Length;)
                             {
-                                var index = aclCount + streamCount + denseCount + curveIndex;
+                                var index = streamCount + denseCount + curveIndex;
                                 ReadCurveData(iAnim, m_ClipBindingConstant, (int)index, time2, m_ConstantClip.data, 0, ref curveIndex);
                             }
                             time2 = animationClip.m_MuscleClip.m_StopTime;

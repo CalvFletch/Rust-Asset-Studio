@@ -49,17 +49,10 @@ namespace AssetStudio
                     var compressedLength = shader.compressedLengths[i][j];
                     var decompressedLength = shader.decompressedLengths[i][j];
                     var decompressedBytes = new byte[decompressedLength];
-                    if (shader.assetsFile.game.Type.IsGISubGroup())
+                    var numWrite = LZ4.Decompress(shader.compressedBlob.AsSpan().Slice((int)offset, (int)compressedLength), decompressedBytes.AsSpan().Slice(0, (int)decompressedLength));
+                    if (numWrite != decompressedLength)
                     {
-                        Buffer.BlockCopy(shader.compressedBlob, (int)offset, decompressedBytes, 0, (int)decompressedLength);
-                    }
-                    else
-                    {
-                        var numWrite = LZ4.Decompress(shader.compressedBlob.AsSpan().Slice((int)offset, (int)compressedLength), decompressedBytes.AsSpan().Slice(0, (int)decompressedLength));
-                        if (numWrite != decompressedLength)
-                        {
-                            throw new IOException($"Lz4 decompression error, write {numWrite} bytes but expected {decompressedLength} bytes");
-                        }
+                        throw new IOException($"Lz4 decompression error, write {numWrite} bytes but expected {decompressedLength} bytes");
                     }
                     using (var blobReader = new EndianBinaryReader(new MemoryStream(decompressedBytes), EndianType.LittleEndian))
                     {
@@ -914,10 +907,6 @@ namespace AssetStudio
                 entries[i] = new ShaderSubProgramEntry(reader, shader.version);
             }
             m_SubPrograms = new ShaderSubProgram[subProgramsCapacity];
-            if (shader.assetsFile.game.Type.IsGI())
-            {
-                hasUpdatedGpuProgram = SerializedSubProgram.HasInstancedStructuredBuffers(shader.serializedType) || SerializedSubProgram.HasGlobalLocalKeywordIndices(shader.serializedType);
-            }
         }
 
         public void Read(EndianBinaryReader reader, int segment)
