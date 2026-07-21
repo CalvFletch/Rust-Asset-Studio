@@ -342,3 +342,6 @@ healthchecksdb
 /AssetStudioGUI/Properties/launchSettings.json
 # Internal planning docs - keep out of the public repo
 docs/
+
+# VS Code workspace files
+*.code-workspace
