@@ -333,12 +333,12 @@ namespace AssetStudio.CLI
                         containers.Add((m_Container.Value, m_Container.Key));
                     }
 
-                    exportable = ClassIDType.GameObject.CanExport();
+                    exportable = ClassIDType.ResourceManager.CanExport();
                     break;
                 case Mesh _ when ClassIDType.Mesh.CanExport():
                 case TextAsset _ when ClassIDType.TextAsset.CanExport():
-                case AnimationClip _ when ClassIDType.Font.CanExport():
-                case Font _ when ClassIDType.GameObject.CanExport():
+                case AnimationClip _ when ClassIDType.AnimationClip.CanExport():
+                case Font _ when ClassIDType.Font.CanExport():
                 case MovieTexture _ when ClassIDType.MovieTexture.CanExport():
                 case Sprite _ when ClassIDType.Sprite.CanExport():
                 case Material _ when ClassIDType.Material.CanExport():

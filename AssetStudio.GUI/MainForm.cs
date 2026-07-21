@@ -1109,7 +1109,6 @@ namespace AssetStudio.GUI
                         PreviewSprite(assetItem, m_Sprite);
                         break;
                     case Animator m_Animator when Properties.Settings.Default.enableModelPreview:
-                        //StatusStripUpdate("Can be exported to FBX file.");
                         PreviewAnimator(m_Animator);
                         break;
                     case AnimationClip m_AnimationClip:
@@ -2202,97 +2201,12 @@ namespace AssetStudio.GUI
         {
             logger.ShowErrorMessage = toolStripMenuItem15.Checked;
         }
-        private async void toolStripMenuItem19_DropDownOpening(object sender, EventArgs e)
-        {
-            if (specifyAIVersion.Enabled && await AIVersionManager.FetchVersions())
-            {
-                UpdateVersionList();
-            }
-        }
-
         private void miscToolStripMenuItem_DropDownOpening(object sender, EventArgs e)
         {
             if (miscToolStripMenuItem.Enabled)
             {
                 MapNameComboBox.Items.Clear();
                 MapNameComboBox.Items.AddRange(AssetsHelper.GetMaps());
-            }
-        }
-
-        private async void toolStripComboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (specifyAIVersion.SelectedIndex == 0)
-            {
-                return;
-            }
-            if (skipContainer.Checked)
-            {
-                Logger.Info("Skip container is enabled, aborting...");
-                return;
-            }
-            optionsToolStripMenuItem.DropDown.Visible = false;
-            var version = specifyAIVersion.SelectedItem.ToString();
-
-            if (version.Contains(' '))
-            {
-                version = version.Split(' ')[0];
-            }
-
-            Logger.Info($"Loading AI v{version}");
-            InvokeUpdate(specifyAIVersion, false);
-            var path = await AIVersionManager.FetchAI(version);
-            await Task.Run(() => ResourceIndex.FromFile(path));
-            UpdateContainers();
-            UpdateVersionList();
-            InvokeUpdate(specifyAIVersion, true);
-        }
-
-        private void UpdateVersionList()
-        {
-            var selectedIndex = specifyAIVersion.SelectedIndex;
-            specifyAIVersion.Items.Clear();
-            specifyAIVersion.Items.Add("None");
-
-            var versions = AIVersionManager.GetVersions();
-            foreach (var version in versions)
-            {
-                specifyAIVersion.Items.Add(version.Item1 + (version.Item2 ? " (cached)" : ""));
-            }
-
-            specifyAIVersion.SelectedIndexChanged -= new EventHandler(toolStripComboBox1_SelectedIndexChanged);
-            specifyAIVersion.SelectedIndex = selectedIndex;
-            specifyAIVersion.SelectedIndexChanged += new EventHandler(toolStripComboBox1_SelectedIndexChanged);
-        }
-
-        private void UpdateContainers()
-        {
-            if (exportableAssets.Count > 0)
-            {
-                Logger.Info("Updating Containers...");
-                assetListView.BeginUpdate();
-                foreach (var asset in exportableAssets)
-                {
-                    if (int.TryParse(asset.Container, out var value))
-                    {
-                        var last = unchecked((uint)value);
-                        var name = Path.GetFileNameWithoutExtension(asset.SourceFile.originalPath);
-                        if (uint.TryParse(name, out var id))
-                        {
-                            var path = ResourceIndex.GetContainer(id, last);
-                            if (!string.IsNullOrEmpty(path))
-                            {
-                                asset.Container = path;
-                                asset.SubItems[1].Text = path;
-                                if (asset.Type == ClassIDType.MiHoYoBinData)
-                                {
-                                    asset.Text = Path.GetFileNameWithoutExtension(path);
-                                }
-                            }
-                        }
-                    }
-                }
-                assetListView.EndUpdate();
-                Logger.Info("Updated !!");
             }
         }
 
@@ -2619,27 +2533,6 @@ namespace AssetStudio.GUI
             AssetsHelper.tokenSource.Cancel();
         }
 
-        private async void loadAIToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            if (skipContainer.Checked)
-            {
-                Logger.Info("Skip container is enabled, aborting...");
-                return;
-            }
-            miscToolStripMenuItem.DropDown.Visible = false;
-
-            var openFileDialog = new OpenFileDialog() { Multiselect = false, Filter = "Asset Index JSON File|*.json" };
-            if (openFileDialog.ShowDialog(this) == DialogResult.OK)
-            {
-                var path = openFileDialog.FileName;
-                Logger.Info($"Loading AI...");
-                InvokeUpdate(loadAIToolStripMenuItem, false);
-                await Task.Run(() => ResourceIndex.FromFile(path));
-                UpdateContainers();
-                InvokeUpdate(loadAIToolStripMenuItem, true);
-            }
-        }
-
         private async void loadCABMapToolStripMenuItem_Click(object sender, EventArgs e)
         {
             miscToolStripMenuItem.DropDown.Visible = false;
@@ -2844,8 +2737,6 @@ namespace AssetStudio.GUI
                 {
                     result = channel.stop();
                     if (ERRCHECK(result)) { return; }
-                    //channel = null;
-                    //don't FMODreset, it will nullify the sound
                     timer.Stop();
                     FMODprogressBar.Value = 0;
                     FMODtimerLabel.Text = "0:00.0 / 0:00.0";
