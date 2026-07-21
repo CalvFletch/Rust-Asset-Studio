@@ -22,28 +22,14 @@ jobs:
       - name: Nuget Restore
         run: nuget restore
 
-      - name: Build .Net7
-        run: msbuild /t:AssetStudio_GUI:publish /p:Configuration=Release /p:TargetFramework=net7.0-windows /p:SelfContained=false /verbosity:minimal
-
       - name: Build .Net8
         run: msbuild /t:AssetStudio_GUI:publish /p:Configuration=Release /p:TargetFramework=net8.0-windows /p:SelfContained=false /verbosity:minimal
-
-      - name: Build .Net7 CLI
-        run: msbuild /t:AssetStudio_CLI:publish /p:Configuration=Release /p:TargetFramework=net7.0-windows /p:SelfContained=false /verbosity:minimal
 
       - name: Build .Net8 CLI
         run: msbuild /t:AssetStudio_CLI:publish /p:Configuration=Release /p:TargetFramework=net8.0-windows /p:SelfContained=false /verbosity:minimal
 
       # GUI and CLI share one publish folder (AssetStudio.CLI.csproj sets
-      # BaseOutputPath to AssetStudio.GUI/bin), so one upload per TFM covers both.
-      # upload-artifact@v4 rejects duplicate artifact names, so the former
-      # separate CLI upload steps (same name + path) had to go.
-      - name: Upload .Net7 Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: net7.0-${{ github.sha }}
-          path: AssetStudio.GUI/bin/Release/net7.0-windows/publish
-
+      # BaseOutputPath to AssetStudio.GUI/bin), so one upload covers both.
       - name: Upload .Net8 Artifact
         uses: actions/upload-artifact@v4
         with:
