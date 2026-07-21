@@ -325,8 +325,6 @@ namespace AssetStudio
                     BuildAssetMap(file, assets, typeFilters, nameFilters, containerFilters);
                 }
 
-                UpdateContainers(assets, game);
-
                 ExportAssetsMap(assets, game, mapName, savePath, exportListType, resetEvent);
             }
             catch(Exception e)
@@ -339,7 +337,6 @@ namespace AssetStudio
         private static void BuildAssetMap(string file, List<AssetEntry> assets, ClassIDType[] typeFilters = null, Regex[] nameFilters = null, Regex[] containerFilters = null)
         {
             var containers = new List<(PPtr<Object>, string)>();
-            var mihoyoBinDataNames = new List<(PPtr<Object>, string)>();
             var objectAssetItemDic = new Dictionary<Object, AssetEntry>();
             var animators = new List<(PPtr<Object>, AssetEntry)>();
             foreach (var assetsFile in assetsManager.assetsFileList)
@@ -404,21 +401,6 @@ namespace AssetStudio
                                 animators.Add((component, asset));
                                 exportable = ClassIDType.Animator.CanExport();
                                 break;
-                            case ClassIDType.MiHoYoBinData when ClassIDType.MiHoYoBinData.CanParse():
-                                var MiHoYoBinData = new MiHoYoBinData(objectReader);
-                                obj = MiHoYoBinData;
-                                exportable = ClassIDType.MiHoYoBinData.CanExport();
-                                break;
-                            case ClassIDType.IndexObject when ClassIDType.IndexObject.CanParse():
-                                var indexObject = new IndexObject(objectReader);
-                                obj = null;
-                                foreach (var index in indexObject.AssetMap)
-                                {
-                                    mihoyoBinDataNames.Add((index.Value.Object, index.Key));
-                                }
-                                asset.Name = "IndexObject";
-                                exportable = ClassIDType.IndexObject.CanExport();
-                                break;
                             case ClassIDType.Font when ClassIDType.Font.CanExport():
                             case ClassIDType.Material when ClassIDType.Material.CanExport():
                             case ClassIDType.Texture when ClassIDType.Texture.CanExport():
@@ -474,19 +456,6 @@ namespace AssetStudio
                 }
 
             }
-            foreach ((var pptr, var name) in mihoyoBinDataNames)
-            {
-                if (pptr.TryGet<MiHoYoBinData>(out var miHoYoBinData))
-                {
-                    var asset = objectAssetItemDic[miHoYoBinData];
-                    if (int.TryParse(name, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var hash))
-                    {
-                        asset.Name = name;
-                        asset.Container = hash.ToString();
-                    }
-                    else asset.Name = $"BinFile #{asset.PathID}";
-                }
-            }
             foreach ((var pptr, var container) in containers)
             {
                 if (pptr.TryGet(out var obj))
@@ -501,35 +470,6 @@ namespace AssetStudio
                         assets.Remove(item);
                     }
                 }
-            }
-        }
-
-        private static void UpdateContainers(List<AssetEntry> assets, Game game)
-        {
-            if (game.Type.IsGISubGroup() && assets.Count > 0)
-            {
-                Logger.Info("Updating Containers...");
-                foreach (var asset in assets)
-                {
-                    if (int.TryParse(asset.Container, out var value))
-                    {
-                        var last = unchecked((uint)value);
-                        var name = Path.GetFileNameWithoutExtension(asset.Source);
-                        if (uint.TryParse(name, out var id))
-                        {
-                            var path = ResourceIndex.GetContainer(id, last);
-                            if (!string.IsNullOrEmpty(path))
-                            {
-                                asset.Container = path;
-                                if (asset.Type == ClassIDType.MiHoYoBinData)
-                                {
-                                    asset.Name = Path.GetFileNameWithoutExtension(path);
-                                }
-                            }
-                        }
-                    }
-                }
-                Logger.Info("Updated !!");
             }
         }
 
@@ -614,7 +554,6 @@ namespace AssetStudio
                 BuildAssetMap(file, assets, typeFilters, nameFilters, containerFilters);
             }
 
-            UpdateContainers(assets, game);
             DumpCABMap(mapName);
 
             Logger.Info($"Map build successfully !! {collision} collisions found");

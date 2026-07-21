@@ -92,11 +92,6 @@ namespace AssetStudio
                     Logger.Verbose($"Parsed target format {m_TargetPlatform} doesn't match any of supported formats, defaulting to {BuildTarget.UnknownPlatform}");
                     m_TargetPlatform = BuildTarget.UnknownPlatform;
                 }
-                else if (m_TargetPlatform == BuildTarget.NoTarget && game.Type.IsMhyGroup())
-                {
-                    Logger.Verbose($"Selected game {game.Name} is a mhy game, forcing target format {BuildTarget.StandaloneWindows64}");
-                    m_TargetPlatform = BuildTarget.StandaloneWindows64;
-                }
                 Logger.Verbose($"Target format {m_TargetPlatform}");
             }
             if (header.m_Version >= SerializedFileFormatVersion.HasTypeTreeHashes)
@@ -260,12 +255,6 @@ namespace AssetStudio
 
             type.classID = reader.ReadInt32();
 
-            if (game.Type.IsGIGroup() && BitConverter.ToBoolean(header.m_Reserved))
-            {
-                Logger.Verbose($"Encoded class ID {type.classID}, decoding...");
-                type.classID = DecodeClassID(type.classID);
-            }
-
             if (header.m_Version >= SerializedFileFormatVersion.RefactoredClassId)
             {
                 type.m_IsStrippedType = reader.ReadBoolean();
@@ -413,14 +402,6 @@ namespace AssetStudio
             Logger.Verbose($"Caching object with {obj.m_PathID} in file {fileName}...");
             Objects.Add(obj);
             ObjectsDic.Add(obj.m_PathID, obj);
-        }
-
-        private static int DecodeClassID(int value)
-        {
-            var bytes = BitConverter.GetBytes(value);
-            Array.Reverse(bytes);
-            value = BitConverter.ToInt32(bytes, 0);
-            return (value ^ 0x23746FBE) - 3;
         }
 
         public bool IsVersionStripped => unityVersion == strippedVersion;

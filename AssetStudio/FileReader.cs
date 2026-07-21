@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using static AssetStudio.ImportHelper;
 
 namespace AssetStudio
 {
@@ -15,10 +14,6 @@ namespace AssetStudio
         private static readonly byte[] brotliMagic = { 0x62, 0x72, 0x6F, 0x74, 0x6C, 0x69 };
         private static readonly byte[] zipMagic = { 0x50, 0x4B, 0x03, 0x04 };
         private static readonly byte[] zipSpannedMagic = { 0x50, 0x4B, 0x07, 0x08 };
-        private static readonly byte[] mhy0Magic = { 0x6D, 0x68, 0x79, 0x30 };
-        private static readonly byte[] blbMagic = { 0x42, 0x6C, 0x62, 0x02 };
-        private static readonly byte[] narakaMagic = { 0x15, 0x1E, 0x1C, 0x0D, 0x0D, 0x23, 0x21 };
-        private static readonly byte[] gunfireMagic = { 0x7C, 0x6D, 0x79, 0x72, 0x27, 0x7A, 0x73, 0x78, 0x3F };
 
 
         public FileReader(string path) : this(path, File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) { }
@@ -45,10 +40,6 @@ namespace AssetStudio
                     return FileType.BundleFile;
                 case "UnityWebData1.0":
                     return FileType.WebFile;
-                case "blk":
-                    return FileType.BlkFile;
-                case "ENCR":
-                    return FileType.ENCRFile;
                 default:
                     {
                         Logger.Verbose("signature does not match any of the supported string signatures, attempting to check bytes signatures");
@@ -81,33 +72,6 @@ namespace AssetStudio
                             return FileType.ZipFile;
                         }
                         Logger.Verbose($"Parsed signature does not match with expected signature {Convert.ToHexString(zipMagic)} or {Convert.ToHexString(zipSpannedMagic)}");
-                        if (mhy0Magic.SequenceEqual(magic))
-                        {
-                            return FileType.MhyFile;
-                        }
-                        Logger.Verbose($"Parsed signature does not match with expected signature {Convert.ToHexString(mhy0Magic)}");
-                        if (blbMagic.SequenceEqual(magic))
-                        {
-                            return FileType.BlbFile;
-                        }
-                        Logger.Verbose($"Parsed signature does not match with expected signature {Convert.ToHexString(mhy0Magic)}");
-                        magic = ReadBytes(7);
-                        Position = 0;
-                        Logger.Verbose($"Parsed signature is {Convert.ToHexString(magic)}");
-                        if (narakaMagic.SequenceEqual(magic))
-                        {
-                            return FileType.BundleFile;
-                        }
-                        Logger.Verbose($"Parsed signature does not match with expected signature {Convert.ToHexString(narakaMagic)}");
-                        magic = ReadBytes(9);
-                        Position = 0;
-                        Logger.Verbose($"Parsed signature is {Convert.ToHexString(magic)}");
-                        if (gunfireMagic.SequenceEqual(magic))
-                        {
-                            Position = 0x32;
-                            return FileType.BundleFile;
-                        }
-                        Logger.Verbose($"Parsed signature does not match with expected signature {Convert.ToHexString(gunfireMagic)}");
                         Logger.Verbose($"Parsed signature does not match any of the supported signatures, assuming resource file");
                         return FileType.ResourceFile;
                     }
@@ -162,96 +126,8 @@ namespace AssetStudio
     {
         public static FileReader PreProcessing(this FileReader reader, Game game)
         {
-            Logger.Verbose($"Applying preprocessing to file {reader.FileName}");
-            if (reader.FileType == FileType.ResourceFile || !game.Type.IsPlain())
-            {
-                Logger.Verbose("File is encrypted !!");
-                switch (game.Type)
-                {
-                    case GameType.GI_Pack:
-                        reader = DecryptPack(reader, game);
-                        break;
-                    case GameType.GI_CB1:
-                        reader = DecryptMark(reader);
-                        break;
-                    case GameType.EnsembleStars:
-                        reader = DecryptEnsembleStar(reader);
-                        break;
-                    case GameType.OPFP:
-                    case GameType.FakeHeader:
-                    case GameType.ShiningNikki:
-                        reader = ParseFakeHeader(reader);
-                        break;
-                    case GameType.FantasyOfWind:
-                        reader = DecryptFantasyOfWind(reader);
-                        break;
-                    case GameType.HelixWaltz2:
-                        reader = ParseHelixWaltz2(reader);
-                        break;
-                    case GameType.AnchorPanic:
-                        reader = DecryptAnchorPanic(reader);
-                        break;
-                    case GameType.DreamscapeAlbireo:
-                        reader = DecryptDreamscapeAlbireo(reader);
-                        break;
-                    case GameType.ImaginaryFest:
-                        reader = DecryptImaginaryFest(reader);
-                        break;
-                    case GameType.AliceGearAegis:
-                        reader = DecryptAliceGearAegis(reader);
-                        break;
-                    case GameType.ProjectSekai:
-                        reader = DecryptProjectSekai(reader);
-                        break;
-                    case GameType.CodenameJump:
-                        reader = DecryptCodenameJump(reader);
-                        break;
-                    case GameType.GirlsFrontline:
-                        reader = DecryptGirlsFrontline(reader);
-                        break; 
-                    case GameType.Reverse1999:
-                        reader = DecryptReverse1999(reader);
-                        break;
-                    case GameType.JJKPhantomParade:
-                        reader = DecryptJJKPhantomParade(reader);
-                        break;
-                    case GameType.MuvLuvDimensions:
-                        reader = DecryptMuvLuvDimensions(reader);
-                        break;
-                    case GameType.PartyAnimals:
-                        reader = DecryptPartyAnimals(reader);
-                        break;
-                    case GameType.LoveAndDeepspace:
-                        reader = DecryptLoveAndDeepspace(reader);
-                        break;
-                    case GameType.SchoolGirlStrikers:
-                        reader = DecryptSchoolGirlStrikers(reader);
-                        break;
-                }
-            }
-            if (reader.FileType == FileType.BundleFile && game.Type.IsBlockFile() || reader.FileType == FileType.ENCRFile || reader.FileType == FileType.BlbFile)
-            {
-                Logger.Verbose("File might have multiple bundles !!");
-                try
-                {
-                    var signature = reader.ReadStringToNull();
-                    reader.ReadInt32();
-                    reader.ReadStringToNull();
-                    reader.ReadStringToNull();
-                    var size = reader.ReadInt64();
-                    if (size != reader.BaseStream.Length)
-                    {
-                        Logger.Verbose($"Found signature {signature}, expected bundle size is 0x{size:X8}, found 0x{reader.BaseStream.Length} instead !!");
-                        Logger.Verbose("Loading as block file !!");
-                        reader.FileType = FileType.BlockFile;
-                    }
-                }
-                catch (Exception) { }
-                reader.Position = 0;
-            }
-
             Logger.Verbose("No preprocessing is needed");
             return reader;
         }
-    } 
+    }
 }

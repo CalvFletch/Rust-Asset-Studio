@@ -66,10 +66,6 @@ namespace AssetStudio.GUI
                 extractedCount += ExtractBundleFile(reader, savePath);
             else if (reader.FileType == FileType.WebFile)
                 extractedCount += ExtractWebDataFile(reader, savePath);
-            else if (reader.FileType == FileType.BlkFile)
-                extractedCount += ExtractBlkFile(reader, savePath);
-            else if (reader.FileType == FileType.BlockFile)
-                extractedCount += ExtractBlockFile(reader, savePath);
             else
                 reader.Dispose();
             return extractedCount;
@@ -78,19 +74,12 @@ namespace AssetStudio.GUI
         private static int ExtractBundleFile(FileReader reader, string savePath)
         {
             StatusStripUpdate($"Decompressing {reader.FileName} ...");
-            try
+            var bundleFile = new BundleFile(reader, Game);
+            reader.Dispose();
+            if (bundleFile.fileList.Count > 0)
             {
-                var bundleFile = new BundleFile(reader, Game);
-                reader.Dispose();
-                if (bundleFile.fileList.Count > 0)
-                {
-                    var extractPath = Path.Combine(savePath, reader.FileName + "_unpacked");
-                    return ExtractStreamFile(extractPath, bundleFile.fileList);
-                }
-            }
-            catch (InvalidCastException)
-            {
-                Logger.Error($"Game type mismatch, Expected {nameof(Mr0k)} but got {Game.Name} ({Game.GetType().Name}) !!");
+                var extractPath = Path.Combine(savePath, reader.FileName + "_unpacked");
+                return ExtractStreamFile(extractPath, bundleFile.fileList);
             }
             return 0;
         }
@@ -104,73 +93,6 @@ namespace AssetStudio.GUI
             {
                 var extractPath = Path.Combine(savePath, reader.FileName + "_unpacked");
                 return ExtractStreamFile(extractPath, webFile.fileList);
-            }
-            return 0;
-        }
-
-        private static int ExtractBlkFile(FileReader reader, string savePath)
-        {
-            int total = 0;
-            StatusStripUpdate($"Decompressing {reader.FileName} ...");
-            try
-            {
-                using var stream = BlkUtils.Decrypt(reader, (Blk)Game);
-                do
-                {
-                    stream.Offset = stream.AbsolutePosition;
-                    var dummyPath = Path.Combine(reader.FullPath, stream.AbsolutePosition.ToString("X8"));
-                    var subReader = new FileReader(dummyPath, stream, true);
-                    var subSavePath = Path.Combine(savePath, reader.FileName + "_unpacked");
-                    switch (subReader.FileType)
-                    {
-                        case FileType.BundleFile:
-                            total += ExtractBundleFile(subReader, subSavePath);
-                            break;
-                        case FileType.MhyFile:
-                            total += ExtractMhyFile(subReader, subSavePath);
-                            break;
-                    }
-                } while (stream.Remaining > 0);
-            }
-            catch (InvalidCastException)
-            {
-                Logger.Error($"Game type mismatch, Expected {nameof(Blk)} but got {Game.Name} ({Game.GetType().Name}) !!");
-            }
-            return total;
-        }
-
-        private static int ExtractBlockFile(FileReader reader, string savePath)
-        {
-            int total = 0;
-            StatusStripUpdate($"Decompressing {reader.FileName} ...");
-            using var stream = new OffsetStream(reader.BaseStream, 0);
-            do
-            {
-                stream.Offset = stream.AbsolutePosition;
-                var subSavePath = Path.Combine(savePath, reader.FileName + "_unpacked");
-                var dummyPath = Path.Combine(reader.FullPath, stream.AbsolutePosition.ToString("X8"));
-                var subReader = new FileReader(dummyPath, stream, true);
-                total += ExtractBundleFile(subReader, subSavePath);
-            } while (stream.Remaining > 0);
-            return total;
-        }
-
-        private static int ExtractMhyFile(FileReader reader, string savePath)
-        {
-            StatusStripUpdate($"Decompressing {reader.FileName} ...");
-            try
-            {
-                var mhy0File = new MhyFile(reader, (Mhy)Game);
-                reader.Dispose();
-                if (mhy0File.fileList.Count > 0)
-                {
-                    var extractPath = Path.Combine(savePath, reader.FileName + "_unpacked");
-                    return ExtractStreamFile(extractPath, mhy0File.fileList);
-                }
-            }
-            catch (InvalidCastException)
-            {
-                Logger.Error($"Game type mismatch, Expected {nameof(Mhy)} but got {Game.Name} ({Game.GetType().Name}) !!");
             }
             return 0;
         }

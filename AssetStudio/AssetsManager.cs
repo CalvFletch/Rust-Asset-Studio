@@ -155,15 +155,6 @@ namespace AssetStudio
                 case FileType.ZipFile:
                     LoadZipFile(reader);
                     break;
-                case FileType.BlockFile:
-                    LoadBlockFile(reader);
-                    break;
-                case FileType.BlkFile:
-                    LoadBlkFile(reader);
-                    break;
-                case FileType.MhyFile:
-                    LoadMhyFile(reader);
-                    break;
             }
         }
 
@@ -436,163 +427,6 @@ namespace AssetStudio
                 reader.Dispose();
             }
         }
-        private void LoadBlockFile(FileReader reader)
-        {
-            Logger.Info("Loading " + reader.FullPath);
-            try
-            {
-                using var stream = new OffsetStream(reader.BaseStream, 0);
-                foreach (var offset in stream.GetOffsets(reader.FullPath))
-                {
-                    var name = offset.ToString("X8");
-                    Logger.Info($"Loading Block {name}");
-
-                    var dummyPath = Path.Combine(Path.GetDirectoryName(reader.FullPath), name);
-                    var subReader = new FileReader(dummyPath, stream, true);
-                    switch (subReader.FileType)
-                    {
-                        case FileType.ENCRFile:
-                        case FileType.BundleFile:
-                            LoadBundleFile(subReader, reader.FullPath, offset, false);
-                            break;
-                        case FileType.BlbFile:
-                            LoadBlbFile(subReader, reader.FullPath, offset, false);
-                            break;
-                        case FileType.MhyFile:
-                            LoadMhyFile(subReader, reader.FullPath, offset, false);
-                            break;
-                    }
-                }    
-            }
-            catch (Exception e)
-            {
-                Logger.Error($"Error while reading block file {reader.FileName}", e);
-            }
-            finally
-            {
-                reader.Dispose();
-            }
-        }
-        private void LoadBlkFile(FileReader reader)
-        {
-            Logger.Info("Loading " + reader.FullPath);
-            try
-            {
-                using var stream = BlkUtils.Decrypt(reader, (Blk)Game);
-                foreach (var offset in stream.GetOffsets(reader.FullPath))
-                {
-                    var name = offset.ToString("X8");
-                    Logger.Info($"Loading Block {name}");
-
-                    var dummyPath = Path.Combine(Path.GetDirectoryName(reader.FullPath), name);
-                    var subReader = new FileReader(dummyPath, stream, true);
-                    switch (subReader.FileType)
-                    {
-                        case FileType.BundleFile:
-                            LoadBundleFile(subReader, reader.FullPath, offset, false);
-                            break;
-                        case FileType.MhyFile:
-                            LoadMhyFile(subReader, reader.FullPath, offset, false);
-                            break;
-                    }
-                }
-            }
-            catch (InvalidCastException)
-            {
-                Logger.Error($"Game type mismatch, Expected {nameof(Blk)} but got {Game.Name} ({Game.GetType().Name}) !!");
-            }
-            catch (Exception e)
-            {
-                Logger.Error($"Error while reading blk file {reader.FileName}", e);
-            }
-            finally
-            {
-                reader.Dispose();
-            }
-        }
-        private void LoadMhyFile(FileReader reader, string originalPath = null, long originalOffset = 0, bool log = true)
-        {
-            if (log)
-            {
-                Logger.Info("Loading " + reader.FullPath);
-            }
-            try
-            {
-                var mhyFile = new MhyFile(reader, (Mhy)Game);
-                Logger.Verbose($"mhy total size: {mhyFile.m_Header.size:X8}");
-                foreach (var file in mhyFile.fileList)
-                {
-                    var dummyPath = Path.Combine(Path.GetDirectoryName(reader.FullPath), file.fileName);
-                    var cabReader = new FileReader(dummyPath, file.stream);
-                    if (cabReader.FileType == FileType.AssetsFile)
-                    {
-                        LoadAssetsFromMemory(cabReader, originalPath ?? reader.FullPath, mhyFile.m_Header.unityRevision, originalOffset);
-                    }
-                    else
-                    {
-                        Logger.Verbose("Caching resource stream");
-                        resourceFileReaders[file.fileName] = cabReader; //TODO
-                    }
-                }
-            }
-            catch (InvalidCastException)
-            {
-                Logger.Error($"Game type mismatch, Expected {nameof(Mhy)} but got {Game.Name} ({Game.GetType().Name}) !!");
-            }
-            catch (Exception e)
-            {
-                var str = $"Error while reading mhy file {reader.FullPath}";
-                if (originalPath != null)
-                {
-                    str += $" from {Path.GetFileName(originalPath)}";
-                }
-                Logger.Error(str, e);
-            }
-            finally
-            {
-                reader.Dispose();
-            }
-        }
-        
-        private void LoadBlbFile(FileReader reader, string originalPath = null, long originalOffset = 0, bool log = true)
-        {
-            if (log)
-            {
-                Logger.Info("Loading " + reader.FullPath);
-            }
-            try
-            {
-                var blbFile = new BlbFile(reader, reader.FullPath);
-                foreach (var file in blbFile.fileList)
-                {
-                    var dummyPath = Path.Combine(Path.GetDirectoryName(reader.FullPath), file.fileName);
-                    var cabReader = new FileReader(dummyPath, file.stream);
-                    if (cabReader.FileType == FileType.AssetsFile)
-                    {
-                        LoadAssetsFromMemory(cabReader, originalPath ?? reader.FullPath, blbFile.m_Header.unityRevision, originalOffset);
-                    }
-                    else
-                    {
-                        Logger.Verbose("Caching resource stream");
-                        resourceFileReaders[file.fileName] = cabReader; //TODO
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                var str = $"Error while reading Blb file {reader.FullPath}";
-                if (originalPath != null)
-                {
-                    str += $" from {Path.GetFileName(originalPath)}";
-                }
-                Logger.Error(str, e);
-            }
-            finally
-            {
-                reader.Dispose();
-            }
-        }
-
         public void CheckStrippedVersion(SerializedFile assetsFile)
         {
             if (assetsFile.IsVersionStripped && string.IsNullOrEmpty(SpecifyUnityVersion))
@@ -666,12 +500,10 @@ namespace AssetStudio
                             ClassIDType.Avatar when ClassIDType.Avatar.CanParse() => new Avatar(objectReader),
                             ClassIDType.Font when ClassIDType.Font.CanParse() => new Font(objectReader),
                             ClassIDType.GameObject when ClassIDType.GameObject.CanParse() => new GameObject(objectReader),
-                            ClassIDType.IndexObject when ClassIDType.IndexObject.CanParse() => new IndexObject(objectReader),
                             ClassIDType.Material when ClassIDType.Material.CanParse() => new Material(objectReader),
                             ClassIDType.Mesh when ClassIDType.Mesh.CanParse() => new Mesh(objectReader),
                             ClassIDType.MeshFilter when ClassIDType.MeshFilter.CanParse() => new MeshFilter(objectReader),
                             ClassIDType.MeshRenderer when ClassIDType.MeshRenderer.CanParse() => new MeshRenderer(objectReader),
-                            ClassIDType.MiHoYoBinData when ClassIDType.MiHoYoBinData.CanParse() => new MiHoYoBinData(objectReader),
                             ClassIDType.MonoBehaviour when ClassIDType.MonoBehaviour.CanParse() => new MonoBehaviour(objectReader),
                             ClassIDType.MonoScript when ClassIDType.MonoScript.CanParse() => new MonoScript(objectReader),
                             ClassIDType.MovieTexture when ClassIDType.MovieTexture.CanParse() => new MovieTexture(objectReader),
